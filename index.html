@@ -1363,27 +1363,63 @@ const observer = new MutationObserver(() => {
 });
 observer.observe(document.getElementById('pageContent'), { childList: true });
 
-// ==================== ইনিশিয়াল লোড (Firebase থেকে) ====================
-async function initApp() {
-    try {
-        const [bSnap, rSnap, tSnap] = await Promise.all([
-            db.ref('lib_books').once('value'),
-            db.ref('lib_readers').once('value'),
-            db.ref('lib_transactions').once('value')
-        ]);
+// ==================== রিয়েলটাইম লোড ও লিসেনার (Firebase থেকে) ====================
+let _initialLoadDone = false;
+let _firstSnapCount = 0;
 
-        books = bSnap.exists() ? bSnap.val() : JSON.parse(JSON.stringify(defaultBooks));
-        readers = rSnap.exists() ? rSnap.val() : JSON.parse(JSON.stringify(defaultReaders));
-        transactions = tSnap.exists() ? tSnap.val() : JSON.parse(JSON.stringify(defaultTransactions));
-
-        if (!bSnap.exists()) saveData('lib_books', books);
-        if (!rSnap.exists()) saveData('lib_readers', readers);
-        if (!tSnap.exists()) saveData('lib_transactions', transactions);
-
+function _afterFirstLoad() {
+    _firstSnapCount++;
+    if (_firstSnapCount >= 3 && !_initialLoadDone) {
+        _initialLoadDone = true;
         const overlay = document.getElementById('loadingOverlay');
         if (overlay) overlay.remove();
-
         navigateTo('dashboard');
+    }
+}
+
+function initApp() {
+    try {
+        db.ref('lib_books').on('value', (snap) => {
+            if (snap.exists()) {
+                books = snap.val();
+            } else if (!_initialLoadDone) {
+                books = JSON.parse(JSON.stringify(defaultBooks));
+                saveData('lib_books', books);
+            }
+            if (_initialLoadDone) renderPage();
+            else _afterFirstLoad();
+        }, (err) => {
+            console.error(err);
+            showToast('বই ডেটা সিঙ্ক ব্যর্থ হয়েছে', 'error');
+        });
+
+        db.ref('lib_readers').on('value', (snap) => {
+            if (snap.exists()) {
+                readers = snap.val();
+            } else if (!_initialLoadDone) {
+                readers = JSON.parse(JSON.stringify(defaultReaders));
+                saveData('lib_readers', readers);
+            }
+            if (_initialLoadDone) renderPage();
+            else _afterFirstLoad();
+        }, (err) => {
+            console.error(err);
+            showToast('রিডার ডেটা সিঙ্ক ব্যর্থ হয়েছে', 'error');
+        });
+
+        db.ref('lib_transactions').on('value', (snap) => {
+            if (snap.exists()) {
+                transactions = snap.val();
+            } else if (!_initialLoadDone) {
+                transactions = JSON.parse(JSON.stringify(defaultTransactions));
+                saveData('lib_transactions', transactions);
+            }
+            if (_initialLoadDone) renderPage();
+            else _afterFirstLoad();
+        }, (err) => {
+            console.error(err);
+            showToast('লেনদেন ডেটা সিঙ্ক ব্যর্থ হয়েছে', 'error');
+        });
     } catch (err) {
         console.error(err);
         const overlay = document.getElementById('loadingOverlay');

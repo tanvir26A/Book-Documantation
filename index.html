@@ -1377,13 +1377,22 @@ function _afterFirstLoad() {
     }
 }
 
+// FIX: Firebase Realtime Database মাঝে মাঝে array-কে object আকারে ফেরত দেয়
+// (বিশেষত array-র মাঝ থেকে কোনো item delete হলে)। এই ফাংশনটা নিশ্চিত করে
+// books/readers/transactions সবসময় প্রকৃত array হিসেবেই থাকে, যাতে
+// .push()/.find()/.filter() ইত্যাদি কখনো ভেঙে না পড়ে (যেটার কারণেই
+// "বই ইস্যু করুন" সাবমিট করলে পেজ সাদা হয়ে যাচ্ছিল)।
+function _toArray(v) {
+    if (Array.isArray(v)) return v.filter(x => x != null);
+    if (v && typeof v === 'object') return Object.values(v).filter(x => x != null);
+    return [];
+}
+
 function initApp() {
     try {
         db.ref('lib_books').on('value', (snap) => {
             if (snap.exists()) {
-    const v = snap.val();
-    books = Array.isArray(v) ? v.filter(x => x != null) : Object.values(v);
-}
+                books = _toArray(snap.val());
             } else if (!_initialLoadDone) {
                 books = JSON.parse(JSON.stringify(defaultBooks));
                 saveData('lib_books', books);
@@ -1397,9 +1406,7 @@ function initApp() {
 
         db.ref('lib_readers').on('value', (snap) => {
             if (snap.exists()) {
-    const v = snap.val();
-    readers = Array.isArray(v) ? v.filter(x => x != null) : Object.values(v);
-}
+                readers = _toArray(snap.val());
             } else if (!_initialLoadDone) {
                 readers = JSON.parse(JSON.stringify(defaultReaders));
                 saveData('lib_readers', readers);
@@ -1413,9 +1420,7 @@ function initApp() {
 
         db.ref('lib_transactions').on('value', (snap) => {
             if (snap.exists()) {
-    const v = snap.val();
-    transactions = Array.isArray(v) ? v.filter(x => x != null) : Object.values(v);
-}
+                transactions = _toArray(snap.val());
             } else if (!_initialLoadDone) {
                 transactions = JSON.parse(JSON.stringify(defaultTransactions));
                 saveData('lib_transactions', transactions);

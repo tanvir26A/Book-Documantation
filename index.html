@@ -1381,7 +1381,9 @@ function initApp() {
     try {
         db.ref('lib_books').on('value', (snap) => {
             if (snap.exists()) {
-                books = snap.val();
+    const v = snap.val();
+    books = Array.isArray(v) ? v.filter(x => x != null) : Object.values(v);
+}
             } else if (!_initialLoadDone) {
                 books = JSON.parse(JSON.stringify(defaultBooks));
                 saveData('lib_books', books);
@@ -1395,7 +1397,9 @@ function initApp() {
 
         db.ref('lib_readers').on('value', (snap) => {
             if (snap.exists()) {
-                readers = snap.val();
+    const v = snap.val();
+    readers = Array.isArray(v) ? v.filter(x => x != null) : Object.values(v);
+}
             } else if (!_initialLoadDone) {
                 readers = JSON.parse(JSON.stringify(defaultReaders));
                 saveData('lib_readers', readers);
@@ -1409,7 +1413,9 @@ function initApp() {
 
         db.ref('lib_transactions').on('value', (snap) => {
             if (snap.exists()) {
-                transactions = snap.val();
+    const v = snap.val();
+    transactions = Array.isArray(v) ? v.filter(x => x != null) : Object.values(v);
+}
             } else if (!_initialLoadDone) {
                 transactions = JSON.parse(JSON.stringify(defaultTransactions));
                 saveData('lib_transactions', transactions);

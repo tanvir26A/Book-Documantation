@@ -322,7 +322,6 @@
 
 <script>
 // ==================== Firebase কনফিগারেশন ====================
-// এখানে নিজের Firebase প্রজেক্টের কনফিগ বসাও (Firebase Console > Project Settings > General থেকে পাবে)
 const firebaseConfig = {
     apiKey: "AIzaSyBMFf3Z_wIgrTADCLHtsBPKK3Xy-axArbU",
     authDomain: "book-documentation-7492a.firebaseapp.com",
@@ -374,7 +373,7 @@ const defaultTransactions = [
     { id: 11, readerId: 4, bookId: 1, issueDate: "২০২৫-০২-১০", dueDate: "২০২৫-০২-২৫", returnDate: null, status: "issued" },
 ];
 
-// Firebase-এ ডেটা সেভ করা (localStorage-এর বদলে)
+// Firebase-এ ডেটা সেভ করা
 function saveData(key, data) {
     db.ref(key).set(data).catch(err => {
         console.error(err);
@@ -672,7 +671,7 @@ function openBookModal(id) {
     const isEdit = !!book;
     openModal(`
         <h3 style="font-size:18px;font-weight:800;color:var(--primary);margin-bottom:20px;">${isEdit ? 'বই সম্পাদনা করুন' : 'নতুন বই যোগ করুন'}</h3>
-        <form onsubmit="saveBook(event, ${id || 0})">
+        <form onsubmit="return saveBook(event, ${id || 0})">
             <div style="display:grid;gap:14px;">
                 <div>
                     <label class="form-label">বইয়ের নাম</label>
@@ -720,7 +719,7 @@ function saveBook(e, id) {
     const total = parseInt(document.getElementById('mBookTotal').value);
     const available = parseInt(document.getElementById('mBookAvail').value);
 
-    if (available > total) { showToast('পাওয়া যাচ্ছে মোটের চেয়ে বেশি হতে পারে না', 'error'); return; }
+    if (available > total) { showToast('পাওয়া যাচ্ছে মোটের চেয়ে বেশি হতে পারে না', 'error'); return false; }
 
     if (id) {
         const book = books.find(b => b.id === id);
@@ -734,6 +733,7 @@ function saveBook(e, id) {
     closeModal();
     renderPage();
     setTimeout(() => { filterBooks(); }, 50);
+    return false;
 }
 
 function deleteBook(id) {
@@ -826,7 +826,7 @@ function openReaderModal(id) {
     const colors = ['#1B4332','#C8602A','#7B2D8E','#2D6A4F','#9C4221','#B8860B','#1A5276','#8B4513'];
     openModal(`
         <h3 style="font-size:18px;font-weight:800;color:var(--primary);margin-bottom:20px;">${isEdit ? 'রিডার সম্পাদনা' : 'নতুন রিডার যোগ করুন'}</h3>
-        <form onsubmit="saveReader(event, ${id || 0})">
+        <form onsubmit="return saveReader(event, ${id || 0})">
             <div style="display:grid;gap:14px;">
                 <div>
                     <label class="form-label">নাম</label>
@@ -893,6 +893,7 @@ function saveReader(e, id) {
     closeModal();
     renderPage();
     setTimeout(() => filterReaders(), 50);
+    return false;
 }
 
 function deleteReader(id) {
@@ -1075,7 +1076,7 @@ function renderIssueReturn() {
                 <h3 style="font-size:16px;font-weight:800;color:var(--primary);margin-bottom:18px;">
                     <i class="fas fa-arrow-right-from-bracket" style="color:var(--accent);margin-right:6px;"></i> বই ইস্যু করুন
                 </h3>
-                <form onsubmit="issueBook(event)">
+                <form onsubmit="return issueBook(event)">
                     <div style="display:grid;gap:14px;">
                         <div>
                             <label class="form-label">রিডার নির্বাচন করুন</label>
@@ -1112,7 +1113,7 @@ function renderIssueReturn() {
                 <h3 style="font-size:16px;font-weight:800;color:var(--primary);margin-bottom:18px;">
                     <i class="fas fa-rotate-left" style="color:var(--success);margin-right:6px;"></i> দ্রুত রিটার্ন
                 </h3>
-                <form onsubmit="quickReturn(event)">
+                <form onsubmit="return quickReturn(event)">
                     <div style="display:grid;gap:14px;">
                         <div>
                             <label class="form-label">রিডার নির্বাচন করুন</label>
@@ -1205,10 +1206,10 @@ function issueBook(e) {
     const issueDate = document.getElementById('issueDate').value;
     const dueDate = document.getElementById('dueDate').value;
 
-    if (!issueDate || !dueDate) { showToast('তারিখ নির্বাচন করুন', 'error'); return; }
+    if (!issueDate || !dueDate) { showToast('তারিখ নির্বাচন করুন', 'error'); return false; }
 
     const book = books.find(b => b.id === bookId);
-    if (!book || book.available <= 0) { showToast('এই বইটি এখন পাওয়া যাচ্ছে না', 'error'); return; }
+    if (!book || book.available <= 0) { showToast('এই বইটি এখন পাওয়া যাচ্ছে না', 'error'); return false; }
 
     const bnIssueDate = toBanglaDate(new Date(issueDate));
     const bnDueDate = toBanglaDate(new Date(dueDate));
@@ -1222,16 +1223,18 @@ function issueBook(e) {
     saveData('lib_books', books);
     showToast('বই ইস্যু করা হয়েছে');
     renderPage();
+    return false;
 }
 
 function quickReturn(e) {
     e.preventDefault();
     const txId = parseInt(document.getElementById('returnBook').value);
     const returnDate = document.getElementById('returnDate').value;
-    if (!txId) { showToast('বই নির্বাচন করুন', 'error'); return; }
-    if (!returnDate) { showToast('রিটার্ন তারিখ দিন', 'error'); return; }
+    if (!txId) { showToast('বই নির্বাচন করুন', 'error'); return false; }
+    if (!returnDate) { showToast('রিটার্ন তারিখ দিন', 'error'); return false; }
 
     returnBook(txId, returnDate);
+    return false;
 }
 
 function returnBook(txId, specificDate) {
@@ -1367,11 +1370,6 @@ function _afterFirstLoad() {
     }
 }
 
-// FIX: Firebase Realtime Database মাঝে মাঝে array-কে object আকারে ফেরত দেয়
-// (বিশেষত array-র মাঝ থেকে কোনো item delete হলে)। এই ফাংশনটা নিশ্চিত করে
-// books/readers/transactions সবসময় প্রকৃত array হিসেবেই থাকে, যাতে
-// .push()/.find()/.filter() ইত্যাদি কখনো ভেঙে না পড়ে (যেটার কারণেই
-// "বই ইস্যু করুন" সাবমিট করলে পেজ সাদা হয়ে যাচ্ছিল)।
 function _toArray(v) {
     if (Array.isArray(v)) return v.filter(x => x != null);
     if (v && typeof v === 'object') return Object.values(v).filter(x => x != null);

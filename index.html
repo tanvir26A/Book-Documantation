@@ -2,1436 +2,1190 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>লাইব্রেরি ম্যানেজমেন্ট</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>৩০ নং পূর্ব ওয়ার্ড লাইব্রেরী</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --bg: #F5EFE6;
-            --fg: #1A1A1A;
-            --muted: #8B7E6A;
-            --accent: #C8602A;
-            --accent-light: #E8845A;
+            --primary: #0A3D6B;
+            --primary-light: #1565A0;
+            --primary-lighter: #E3EFF8;
+            --primary-dark: #062A4D;
+            --accent: #C41E3A;
+            --accent-light: #FDE8EB;
+            --accent-dark: #9B1830;
+            --bg: #F4F6F9;
             --card: #FFFFFF;
-            --border: #DDD3C3;
-            --primary: #1B4332;
-            --primary-light: #2D6A4F;
-            --sidebar-bg: #142A1F;
-            --success: #40916C;
-            --warning: #E9C46A;
-            --danger: #E76F51;
+            --text: #111827;
+            --text-secondary: #5A6577;
+            --text-muted: #9CA3AF;
+            --border: #E2E6EC;
+            --success: #0D9668;
+            --warning: #D97706;
+            --danger: #DC2626;
+            --shadow-sm: 0 1px 3px rgba(10,61,107,0.06);
+            --shadow-md: 0 4px 14px rgba(10,61,107,0.1);
+            --shadow-lg: 0 10px 40px rgba(10,61,107,0.15);
+            --radius: 14px;
+            --radius-sm: 10px;
+            --radius-xs: 8px;
+            --gradient-primary: linear-gradient(135deg, #0A3D6B 0%, #1565A0 100%);
+            --gradient-accent: linear-gradient(135deg, #C41E3A 0%, #E8334F 100%);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{font-size:16px;scroll-behavior:smooth}
+        body{
+            font-family:'Noto Sans Bengali',sans-serif;
+            background:#DDE3EB;
+            color:var(--text);
+            min-height:100dvh;
+            overflow-x:hidden;
+            -webkit-font-smoothing:antialiased;
+        }
+        input,button,textarea,select{font-family:inherit}
+        img{display:block;max-width:100%}
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+        #app{
+            max-width:430px;margin:0 auto;min-height:100dvh;
+            position:relative;background:var(--bg);
+            box-shadow:0 0 80px rgba(10,61,107,0.12);
+        }
+        @media(min-width:431px){
+            #app{border-left:1px solid var(--border);border-right:1px solid var(--border)}
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Noto Sans Bengali', sans-serif; background: var(--bg); color: var(--fg); overflow-x: hidden; }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-
-        .sidebar {
-            position: fixed; left: 0; top: 0; bottom: 0; width: 260px;
-            background: var(--sidebar-bg); z-index: 50; transition: transform 0.35s cubic-bezier(.4,0,.2,1);
-            overflow-y: auto;
+        .app-header{
+            position:sticky;top:0;z-index:100;
+            background:var(--gradient-primary);
+            color:#fff;padding:0 18px;height:64px;
+            display:flex;align-items:center;gap:12px;
+            box-shadow:0 4px 24px rgba(10,61,107,0.3);
         }
-        .sidebar.closed { transform: translateX(-100%); }
-        .sidebar-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        .app-header .logo-img{
+            width:42px;height:42px;flex-shrink:0;
+            border-radius:50%;object-fit:cover;
+            border:2px solid rgba(255,255,255,0.3);
         }
-        .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
-
-        .nav-item {
-            display: flex; align-items: center; gap: 12px; padding: 12px 20px;
-            color: #A3B8A8; cursor: pointer; transition: all 0.2s; border-radius: 8px; margin: 2px 12px;
-            font-size: 15px;
+        .app-header .header-text h1{
+            font-size:0.92rem;font-weight:800;
+            line-height:1.3;letter-spacing:-0.01em;
         }
-        .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
-        .nav-item.active { background: var(--accent); color: #fff; font-weight: 600; }
-        .nav-item i { width: 20px; text-align: center; font-size: 16px; }
-
-        .main-content { margin-left: 260px; min-height: 100vh; transition: margin-left 0.35s; }
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.open { transform: translateX(0); }
-            .main-content { margin-left: 0; }
+        .app-header .header-text p{
+            font-size:0.65rem;opacity:0.7;font-weight:400;
+        }
+        .header-accent-line{
+            height:3px;
+            background:var(--gradient-accent);
         }
 
-        .card {
-            background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-            padding: 20px; transition: box-shadow 0.25s, transform 0.25s;
-        }
-        .card:hover { box-shadow: 0 8px 30px rgba(27,67,50,0.1); }
+        .view{display:none;padding:18px 16px 100px;animation:viewIn .25s ease}
+        .view.active{display:block}
+        @keyframes viewIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-        .stat-card {
-            background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-            padding: 20px; position: relative; overflow: hidden;
+        .bottom-nav{
+            position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+            width:100%;max-width:430px;background:var(--card);
+            border-top:1px solid var(--border);display:flex;z-index:200;
+            padding-bottom:env(safe-area-inset-bottom,0);
+            box-shadow:0 -4px 24px rgba(10,61,107,0.08);
         }
-        .stat-card::after {
-            content: ''; position: absolute; top: -20px; right: -20px;
-            width: 80px; height: 80px; border-radius: 50%; opacity: 0.1;
+        .nav-btn{
+            flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+            padding:10px 4px 8px;border:none;background:none;
+            color:var(--text-muted);font-size:0.65rem;font-weight:600;
+            cursor:pointer;transition:all .2s;position:relative;
         }
-        .stat-card.green::after { background: var(--primary); }
-        .stat-card.orange::after { background: var(--accent); }
-        .stat-card.yellow::after { background: var(--warning); }
-        .stat-card.red::after { background: var(--danger); }
-
-        .btn-primary {
-            background: var(--primary); color: #fff; padding: 10px 22px; border-radius: 10px;
-            border: none; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600;
-            transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
-        }
-        .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); }
-        .btn-accent {
-            background: var(--accent); color: #fff; padding: 10px 22px; border-radius: 10px;
-            border: none; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600;
-            transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
-        }
-        .btn-accent:hover { background: var(--accent-light); transform: translateY(-1px); }
-        .btn-outline {
-            background: transparent; color: var(--primary); padding: 8px 18px; border-radius: 10px;
-            border: 1.5px solid var(--border); cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500;
-            transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
-        }
-        .btn-outline:hover { border-color: var(--primary); background: rgba(27,67,50,0.05); }
-        .btn-danger {
-            background: var(--danger); color: #fff; padding: 6px 14px; border-radius: 8px;
-            border: none; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 500;
-            transition: all 0.2s;
-        }
-        .btn-danger:hover { background: #D35A3F; }
-        .btn-sm {
-            padding: 6px 14px; font-size: 12px; border-radius: 8px;
-            border: none; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.2s;
+        .nav-btn i{font-size:1.15rem;transition:transform .2s}
+        .nav-btn.active{color:var(--primary)}
+        .nav-btn.active i{transform:scale(1.15)}
+        .nav-btn.active::before{
+            content:'';position:absolute;top:0;left:20%;width:60%;height:3px;
+            background:var(--gradient-accent);border-radius:0 0 4px 4px;
         }
 
-        .form-input {
-            width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px;
-            font-family: inherit; font-size: 14px; background: #FAFAF7; color: var(--fg);
-            transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+        .section-title{
+            font-size:1.05rem;font-weight:800;margin-bottom:14px;
+            display:flex;align-items:center;gap:8px;color:var(--primary-dark);
         }
-        .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,67,50,0.1); }
-        .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+        .section-title i{color:var(--accent);font-size:0.9rem}
 
-        .modal-backdrop {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 100;
-            display: flex; align-items: center; justify-content: center; padding: 16px;
-            opacity: 0; pointer-events: none; transition: opacity 0.25s;
+        .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+        .stat-card{
+            background:var(--card);border-radius:var(--radius-sm);
+            padding:16px 10px;text-align:center;box-shadow:var(--shadow-sm);
+            border:1px solid var(--border);transition:transform .2s;
+            position:relative;overflow:hidden;
         }
-        .modal-backdrop.active { opacity: 1; pointer-events: auto; }
-        .modal-box {
-            background: var(--card); border-radius: 18px; width: 100%; max-width: 500px;
-            max-height: 90vh; overflow-y: auto; transform: scale(0.92) translateY(20px);
-            transition: transform 0.3s cubic-bezier(.4,0,.2,1); padding: 28px;
+        .stat-card::after{
+            content:'';position:absolute;top:0;left:0;right:0;height:3px;
         }
-        .modal-backdrop.active .modal-box { transform: scale(1) translateY(0); }
+        .stat-card:nth-child(1)::after{background:var(--gradient-primary)}
+        .stat-card:nth-child(2)::after{background:var(--gradient-accent)}
+        .stat-card:nth-child(3)::after{background:linear-gradient(135deg,#0D9668,#10B981)}
+        .stat-card:active{transform:scale(0.97)}
+        .stat-number{font-size:1.7rem;font-weight:900;line-height:1;margin-bottom:4px}
+        .stat-card:nth-child(1) .stat-number{color:var(--primary)}
+        .stat-card:nth-child(2) .stat-number{color:var(--accent)}
+        .stat-card:nth-child(3) .stat-number{color:var(--success)}
+        .stat-label{font-size:0.68rem;color:var(--text-secondary);font-weight:500}
 
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
-        .toast {
-            padding: 12px 20px; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 500;
-            transform: translateX(120%); transition: transform 0.35s cubic-bezier(.4,0,.2,1);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 10px;
-            min-width: 250px;
+        .book-card{
+            background:var(--card);border-radius:var(--radius);
+            padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);
+            border:1px solid var(--border);transition:transform .15s,box-shadow .15s;
+            cursor:pointer;position:relative;overflow:hidden;
         }
-        .toast.show { transform: translateX(0); }
-        .toast.success { background: var(--success); }
-        .toast.error { background: var(--danger); }
-        .toast.info { background: var(--primary); }
+        .book-card::before{
+            content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+            background:var(--gradient-primary);
+        }
+        .book-card:active{transform:scale(0.985);box-shadow:var(--shadow-md)}
+        .book-card-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;padding-left:6px}
+        .book-icon{
+            width:44px;height:44px;background:var(--primary-lighter);
+            border-radius:var(--radius-xs);display:flex;align-items:center;
+            justify-content:center;flex-shrink:0;color:var(--primary);font-size:1.1rem;
+        }
+        .book-info{flex:1;min-width:0}
+        .book-title{font-size:0.9rem;font-weight:700;line-height:1.35;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .book-author{font-size:0.73rem;color:var(--text-secondary)}
+        .book-status{
+            display:inline-flex;align-items:center;gap:4px;
+            padding:3px 10px;border-radius:20px;font-size:0.63rem;font-weight:700;flex-shrink:0;
+        }
+        .status-available{background:#ECFDF5;color:#059669}
+        .status-issued{background:var(--accent-light);color:var(--accent)}
+        .book-meta{
+            display:flex;gap:14px;padding-top:10px;border-top:1px solid var(--border);
+            font-size:0.7rem;color:var(--text-muted);padding-left:6px;
+            flex-wrap:wrap;
+        }
+        .book-meta span i{margin-right:3px;color:var(--primary);opacity:.5}
 
-        .data-table { width: 100%; border-collapse: collapse; }
-        .data-table th {
-            text-align: left; padding: 12px 14px; font-size: 12px; font-weight: 700;
-            color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--border); background: #FAFAF7;
+        .reader-card{
+            background:var(--card);border-radius:var(--radius);
+            padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);
+            border:1px solid var(--border);display:flex;align-items:center;
+            gap:12px;cursor:pointer;transition:transform .15s;
         }
-        .data-table td {
-            padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--border);
-            vertical-align: middle;
+        .reader-card:active{transform:scale(0.985)}
+        .reader-avatar{
+            width:52px;height:52px;border-radius:50%;
+            background:var(--primary-lighter);display:flex;align-items:center;
+            justify-content:center;flex-shrink:0;color:var(--primary);
+            font-weight:800;font-size:1.15rem;overflow:hidden;
+            border:2.5px solid var(--primary-lighter);
         }
-        .data-table tr:hover td { background: rgba(27,67,50,0.03); }
+        .reader-avatar img{width:100%;height:100%;object-fit:cover}
+        .reader-info{flex:1;min-width:0}
+        .reader-name{font-size:0.88rem;font-weight:700;margin-bottom:2px}
+        .reader-stats{font-size:0.68rem;color:var(--text-secondary)}
+        .reader-actions{display:flex;gap:6px}
+        .reader-action-btn{
+            width:34px;height:34px;border-radius:50%;
+            border:1px solid var(--border);background:var(--bg);
+            color:var(--text-secondary);display:flex;align-items:center;
+            justify-content:center;cursor:pointer;font-size:0.72rem;transition:all .2s;
+        }
+        .reader-action-btn.delete:hover{background:#FEE2E2;color:var(--danger);border-color:#FECACA}
 
-        .badge {
-            display: inline-block; padding: 3px 10px; border-radius: 20px;
-            font-size: 11px; font-weight: 700;
+        .search-box{position:relative;margin-bottom:16px}
+        .search-box input{
+            width:100%;padding:12px 16px 12px 42px;border:2px solid var(--border);
+            border-radius:var(--radius-sm);font-size:0.85rem;
+            background:var(--card);color:var(--text);outline:none;transition:border-color .2s;
         }
-        .badge-green { background: #D8F3DC; color: #1B4332; }
-        .badge-red { background: #FDDDDD; color: #9B1C1C; }
-        .badge-orange { background: #FFE8D6; color: #9C4221; }
-        .badge-blue { background: #D6EAF8; color: #1A5276; }
+        .search-box input:focus{border-color:var(--primary)}
+        .search-box input::placeholder{color:var(--text-muted)}
+        .search-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:.9rem}
 
-        .reader-card {
-            background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-            padding: 20px; cursor: pointer; transition: all 0.25s;
+        .btn{
+            display:inline-flex;align-items:center;justify-content:center;gap:6px;
+            padding:11px 20px;border:none;border-radius:var(--radius-sm);
+            font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;
         }
-        .reader-card:hover { box-shadow: 0 8px 30px rgba(27,67,50,0.12); transform: translateY(-3px); border-color: var(--primary); }
-        .reader-avatar {
-            width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 22px; font-weight: 800; color: #fff;
-        }
+        .btn:active{transform:scale(.96)}
+        .btn-primary{background:var(--gradient-primary);color:#fff}
+        .btn-primary:hover{box-shadow:0 4px 16px rgba(10,61,107,.3)}
+        .btn-accent{background:var(--gradient-accent);color:#fff}
+        .btn-accent:hover{box-shadow:0 4px 16px rgba(196,30,58,.3)}
+        .btn-outline{background:transparent;color:var(--primary);border:2px solid var(--primary)}
+        .btn-danger{background:var(--danger);color:#fff}
+        .btn-success{background:var(--success);color:#fff}
+        .btn-warning{background:var(--warning);color:#fff}
+        .btn-sm{padding:8px 14px;font-size:.73rem}
+        .btn-block{width:100%}
+        .btn:disabled{opacity:.5;cursor:not-allowed}
 
-        .profile-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, #40916C 100%);
-            border-radius: 18px; padding: 28px; color: #fff; position: relative; overflow: hidden;
+        .form-group{margin-bottom:16px}
+        .form-label{display:block;font-size:.78rem;font-weight:700;margin-bottom:6px;color:var(--text)}
+        .form-input,.form-select,.form-textarea{
+            width:100%;padding:11px 14px;border:2px solid var(--border);
+            border-radius:var(--radius-xs);font-size:.85rem;
+            background:var(--card);color:var(--text);outline:none;
+            transition:border-color .2s;font-family:inherit;
         }
-        .profile-header::before {
-            content: ''; position: absolute; top: -40px; right: -40px;
-            width: 160px; height: 160px; border-radius: 50%; background: rgba(255,255,255,0.08);
-        }
-        .profile-header::after {
-            content: ''; position: absolute; bottom: -60px; left: 30%;
-            width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.05);
-        }
-
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-in { animation: fadeInUp 0.4s ease-out forwards; }
-        .delay-1 { animation-delay: 0.05s; opacity: 0; }
-        .delay-2 { animation-delay: 0.1s; opacity: 0; }
-        .delay-3 { animation-delay: 0.15s; opacity: 0; }
-        .delay-4 { animation-delay: 0.2s; opacity: 0; }
-
-        .search-bar {
-            position: relative;
-        }
-        .search-bar i {
-            position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px;
-        }
-        .search-bar input { padding-left: 40px; }
-
-        .tab-btn {
-            padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
-            cursor: pointer; border: none; font-family: inherit; transition: all 0.2s;
-            background: transparent; color: var(--muted);
-        }
-        .tab-btn.active { background: var(--primary); color: #fff; }
-        .tab-btn:hover:not(.active) { background: rgba(27,67,50,0.08); color: var(--fg); }
-
-        @media (max-width: 768px) {
-            .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            .data-table th, .data-table td { padding: 10px 12px; white-space: nowrap; }
-        }
-
-        .print-only { display: none; }
-        @media print {
-            .sidebar, .topbar, .no-print { display: none !important; }
-            .main-content { margin-left: 0 !important; }
-            .print-only { display: block; }
+        .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--primary)}
+        .form-textarea{resize:vertical;min-height:80px}
+        .form-select{
+            appearance:none;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235A6577' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
         }
 
-        .float-shape {
-            position: absolute; border-radius: 50%; opacity: 0.04; pointer-events: none;
-            animation: floatShape 8s ease-in-out infinite;
+        .modal-overlay{
+            position:fixed;inset:0;background:rgba(6,42,77,.5);z-index:500;
+            display:none;align-items:flex-end;justify-content:center;
+            animation:fadeIn .2s;backdrop-filter:blur(2px);
         }
-        @keyframes floatShape {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
+        .modal-overlay.active{display:flex}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        .modal-sheet{
+            background:var(--card);width:100%;max-width:430px;max-height:90dvh;
+            border-radius:20px 20px 0 0;padding:0;overflow-y:auto;
+            animation:slideUp .3s ease;
+        }
+        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .modal-handle{width:36px;height:4px;background:var(--border);border-radius:4px;margin:10px auto 0}
+        .modal-header{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:16px 20px 12px;border-bottom:1px solid var(--border);
+        }
+        .modal-header h3{font-size:1rem;font-weight:800;color:var(--primary-dark)}
+        .modal-close{
+            width:32px;height:32px;border-radius:50%;border:none;
+            background:var(--bg);color:var(--text-secondary);display:flex;
+            align-items:center;justify-content:center;cursor:pointer;
+            font-size:.85rem;transition:background .2s;
+        }
+        .modal-close:hover{background:var(--border)}
+        .modal-body{padding:20px}
+
+        .back-btn{
+            display:inline-flex;align-items:center;gap:6px;padding:8px 0;
+            border:none;background:none;color:var(--primary);font-size:.82rem;
+            font-weight:700;cursor:pointer;margin-bottom:12px;font-family:inherit;
+        }
+        .back-btn i{font-size:.75rem}
+
+        .photo-upload{
+            width:100px;height:100px;border-radius:50%;
+            border:3px dashed var(--border);display:flex;flex-direction:column;
+            align-items:center;justify-content:center;cursor:pointer;
+            transition:border-color .2s;margin:0 auto 20px;overflow:hidden;
+            position:relative;background:var(--bg);
+        }
+        .photo-upload:hover{border-color:var(--primary)}
+        .photo-upload i{font-size:1.5rem;color:var(--text-muted)}
+        .photo-upload span{font-size:.62rem;color:var(--text-muted);margin-top:2px}
+        .photo-upload img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+        .photo-upload .change-overlay{
+            position:absolute;inset:0;background:rgba(6,42,77,.55);
+            display:none;align-items:center;justify-content:center;
+            color:#fff;font-size:.7rem;font-weight:600;
+        }
+        .photo-upload.has-photo .change-overlay{display:flex}
+        .photo-upload.has-photo i,.photo-upload.has-photo span{display:none}
+
+        #toast-container{
+            position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:1000;
+            width:calc(100% - 32px);max-width:398px;display:flex;flex-direction:column;
+            gap:8px;pointer-events:none;
+        }
+        .toast{
+            padding:12px 16px;border-radius:var(--radius-xs);font-size:.8rem;font-weight:600;
+            display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-lg);
+            animation:toastIn .3s ease,toastOut .3s ease 2.7s forwards;pointer-events:auto;
+        }
+        .toast-success{background:#059669;color:#fff}
+        .toast-error{background:#DC2626;color:#fff}
+        .toast-warning{background:#D97706;color:#fff}
+        @keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(-10px)}}
+
+        .reader-profile-header{text-align:center;margin-bottom:24px}
+        .reader-profile-avatar{
+            width:92px;height:92px;border-radius:50%;margin:0 auto 12px;overflow:hidden;
+            border:3px solid var(--primary-lighter);background:var(--primary-lighter);
+            display:flex;align-items:center;justify-content:center;
+            color:var(--primary);font-size:2rem;font-weight:800;
+        }
+        .reader-profile-avatar img{width:100%;height:100%;object-fit:cover}
+        .reader-profile-name{font-size:1.15rem;font-weight:900;color:var(--primary-dark)}
+        .reader-profile-phone{font-size:.8rem;color:var(--text-secondary)}
+        .reader-stat-row{display:flex;justify-content:center;gap:28px;margin-top:14px}
+        .reader-stat-item{text-align:center}
+        .reader-stat-num{font-size:1.4rem;font-weight:900;color:var(--primary)}
+        .reader-stat-lbl{font-size:.65rem;color:var(--text-secondary);font-weight:500}
+        .issued-book-item{
+            background:var(--card);border:1px solid var(--border);
+            border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;
+            display:flex;align-items:center;justify-content:space-between;gap:10px;
+        }
+        .issued-book-info{flex:1;min-width:0}
+        .issued-book-title{font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .issued-book-date{font-size:.68rem;color:var(--text-muted)}
+
+        .empty-state{text-align:center;padding:40px 20px;color:var(--text-muted)}
+        .empty-state i{font-size:2.5rem;margin-bottom:12px;opacity:.35}
+        .empty-state p{font-size:.85rem}
+
+        .confirm-content{text-align:center;padding:10px 0}
+        .confirm-content i{font-size:2.5rem;color:var(--danger);margin-bottom:12px}
+        .confirm-content p{font-size:.9rem;line-height:1.6}
+        .confirm-content .confirm-name{font-weight:800;color:var(--text)}
+        .confirm-actions{display:flex;gap:10px;margin-top:20px}
+        .confirm-actions .btn{flex:1}
+
+        .issue-detail-row{
+            display:flex;justify-content:space-between;padding:10px 0;
+            border-bottom:1px solid var(--border);font-size:.82rem;
+        }
+        .issue-detail-row:last-child{border-bottom:none}
+        .issue-detail-label{color:var(--text-secondary)}
+        .issue-detail-value{font-weight:700;text-align:right;max-width:60%}
+
+        .fab{
+            position:fixed;bottom:80px;right:calc(50% - 195px);
+            width:54px;height:54px;border-radius:50%;
+            background:var(--gradient-accent);color:#fff;border:none;
+            font-size:1.3rem;display:none;align-items:center;justify-content:center;
+            cursor:pointer;box-shadow:0 4px 20px rgba(196,30,58,.35);
+            transition:transform .2s;z-index:150;
+        }
+        .fab:active{transform:scale(.9)}
+        .fab.visible{display:flex}
+        @media(max-width:430px){.fab{right:16px}}
+
+        .spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;margin:40px auto}
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        .book-detail-hero{
+            text-align:center;padding:20px 0;margin-bottom:16px;
+            position:relative;
+        }
+        .book-detail-hero::after{
+            content:'';position:absolute;bottom:0;left:20%;right:20%;
+            height:1px;background:var(--border);
+        }
+        .book-detail-icon{
+            width:72px;height:72px;border-radius:16px;
+            background:var(--primary-lighter);display:flex;align-items:center;
+            justify-content:center;margin:0 auto 14px;color:var(--primary);font-size:1.6rem;
         }
 
-        /* লোডিং ওভারলে (Firebase থেকে ডেটা আসার সময়) */
-        #loadingOverlay {
-            position: fixed; inset: 0; background: var(--bg); z-index: 999;
-            display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px;
+        @media(max-width:360px){
+            .stat-grid{gap:6px}
+            .stat-number{font-size:1.3rem}
+            .app-header .header-text h1{font-size:.82rem}
         }
-        .loader-spin {
-            width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary);
-            border-radius: 50%; animation: spin 0.8s linear infinite;
+
+        .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
+        .quick-action-btn{
+            display:flex;align-items:center;gap:10px;padding:14px;
+            border-radius:var(--radius-sm);border:1px solid var(--border);
+            background:var(--card);cursor:pointer;transition:all .2s;
+            box-shadow:var(--shadow-sm);
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .quick-action-btn:active{transform:scale(.97)}
+        .quick-action-btn .qa-icon{
+            width:40px;height:40px;border-radius:10px;display:flex;
+            align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;
+        }
+        .qa-icon.blue{background:var(--primary-lighter);color:var(--primary)}
+        .qa-icon.red{background:var(--accent-light);color:var(--accent)}
+        .quick-action-btn .qa-text{font-size:.78rem;font-weight:700;color:var(--text)}
+        .quick-action-btn .qa-sub{font-size:.65rem;color:var(--text-muted);font-weight:400}
+
+        .conn-badge{
+            position:fixed;top:70px;right:12px;z-index:999;
+            font-size:.62rem;font-weight:700;padding:4px 10px;border-radius:20px;
+            display:flex;align-items:center;gap:5px;box-shadow:var(--shadow-sm);
+            transition:opacity .3s;
+        }
+        .conn-badge.online{background:#ECFDF5;color:#059669}
+        .conn-badge.offline{background:#FEF2F2;color:#DC2626}
+        .conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
     </style>
 </head>
 <body>
-
-<!-- লোডিং ওভারলে -->
-<div id="loadingOverlay">
-    <div class="loader-spin"></div>
-    <div style="color:var(--muted);font-size:14px;font-weight:600;">ডেটা লোড হচ্ছে...</div>
-</div>
-
-<!-- টোস্ট কন্টেইনার -->
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- সাইডবার ওভারলে -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-<!-- সাইডবার -->
-<aside class="sidebar" id="sidebar">
-    <div style="padding: 24px 20px 16px;">
-        <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:42px;height:42px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;">
-                <i class="fas fa-book-open" style="color:#fff;font-size:18px;"></i>
+    <div id="app">
+        <!-- ===== হেডার ===== -->
+        <header class="app-header">
+            <img class="logo-img" src="https://z-cdn-media.chatglm.cn/files/beacad35-425e-483e-9118-f90d3ed5764a.png?auth_key=1885902870-568b4c10c7b9453b88bc5e7037838521-0-c42ba1bdf6a47fac0f683357d4fa370f" alt="লোগো" onerror="this.style.display='none'">
+            <div class="header-text">
+                <h1>৩০ নং পূর্ব ওয়ার্ড লাইব্রেরী</h1>
+                <p>বই ডকুমেন্টেশন সিস্টেম</p>
             </div>
-            <div>
-                <div style="color:#fff;font-size:17px;font-weight:800;line-height:1.2;">আমার লাইব্রেরি</div>
-                <div style="color:#6B8F71;font-size:11px;font-weight:500;">ম্যানেজমেন্ট সিস্টেম</div>
-            </div>
-        </div>
-    </div>
-    <div style="padding:0 0 12px;">
-        <div style="padding:0 20px 10px;font-size:10px;font-weight:700;color:#4A6B50;text-transform:uppercase;letter-spacing:1.5px;">মেনু</div>
-        <div class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
-            <i class="fas fa-th-large"></i> ড্যাশবোর্ড
-        </div>
-        <div class="nav-item" data-page="books" onclick="navigateTo('books')">
-            <i class="fas fa-book"></i> বই সমূহ
-        </div>
-        <div class="nav-item" data-page="readers" onclick="navigateTo('readers')">
-            <i class="fas fa-users"></i> রিডার সমূহ
-        </div>
-        <div class="nav-item" data-page="issueReturn" onclick="navigateTo('issueReturn')">
-            <i class="fas fa-exchange-alt"></i> ইস্যু / রিটার্ন
-        </div>
-    </div>
-    <div style="padding:0 0 20px;">
-        <div style="padding:0 20px 10px;font-size:10px;font-weight:700;color:#4A6B50;text-transform:uppercase;letter-spacing:1.5px;">তথ্য</div>
-        <div class="nav-item" data-page="history" onclick="navigateTo('history')">
-            <i class="fas fa-clock-rotate-left"></i> ইতিহাস
-        </div>
-    </div>
-    <div style="padding:16px 20px;border-top:1px solid rgba(255,255,255,0.08);margin-top:auto;">
-        <div style="color:#6B8F71;font-size:11px;text-align:center;">v1.0 — সর্বস্বত্ব সংরক্ষিত</div>
-    </div>
-</aside>
+        </header>
+        <div class="header-accent-line"></div>
+        <div class="conn-badge offline" id="conn-badge"><span class="conn-dot"></span><span id="conn-text">সংযোগ হচ্ছে...</span></div>
 
-<!-- মেইন কন্টেন্ট -->
-<div class="main-content" id="mainContent">
-    <header class="topbar no-print" style="position:sticky;top:0;z-index:30;background:rgba(245,239,230,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;align-items:center;gap:14px;">
-            <button onclick="toggleSidebar()" style="display:none;background:none;border:none;font-size:20px;color:var(--fg);cursor:pointer;padding:4px;" id="menuBtn">
-                <i class="fas fa-bars"></i>
-            </button>
-            <h2 id="pageTitle" style="font-size:18px;font-weight:800;color:var(--primary);">ড্যাশবোর্ড</h2>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:36px;height:36px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;">
-                <i class="fas fa-user" style="color:#fff;font-size:14px;"></i>
-            </div>
-        </div>
-    </header>
-
-    <div id="pageContent" style="padding:24px;"></div>
-</div>
-
-<!-- মোডাল -->
-<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()">
-    <div class="modal-box" id="modalBox"></div>
-</div>
-
-<script>
-// ==================== Firebase কনফিগারেশন ====================
-const firebaseConfig = {
-    apiKey: "AIzaSyBMFf3Z_wIgrTADCLHtsBPKK3Xy-axArbU",
-    authDomain: "book-documentation-7492a.firebaseapp.com",
-    databaseURL: "https://book-documentation-7492a-default-rtdb.firebaseio.com",
-    projectId: "book-documentation-7492a",
-    storageBucket: "book-documentation-7492a.firebasestorage.app",
-    messagingSenderId: "1014518839027",
-    appId: "1:1014518839027:web:c839e1cb70101f0601e986"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// ==================== ডেটা ম্যানেজমেন্ট ====================
-
-const defaultBooks = [
-    { id: 1, title: "পথের পাঁচালী", author: "বিভূতিভূষণ বন্দ্যোপাধ্যায়", category: "উপন্যাস", total: 5, available: 3, bookNumber: "BN-001" },
-    { id: 2, title: "গোরা", author: "রবীন্দ্রনাথ ঠাকুর", category: "উপন্যাস", total: 3, available: 2, bookNumber: "BN-002" },
-    { id: 3, title: "কপালকুণ্ডলা", author: "বঙ্কিমচন্দ্র চট্টোপাধ্যায়", category: "উপন্যাস", total: 4, available: 4, bookNumber: "BN-003" },
-    { id: 4, title: "দেবদাস", author: "সরৎচন্দ্র চট্টোপাধ্যায়", category: "উপন্যাস", total: 6, available: 3, bookNumber: "BN-004" },
-    { id: 5, title: "চাঁদের পাহাড়", author: "জহির রায়হান", category: "উপন্যাস", total: 3, available: 1, bookNumber: "BN-005" },
-    { id: 6, title: "ক্রীতদাসের হাসি", author: "হুমায়ূন আহমেদ", category: "উপন্যাস", total: 4, available: 2, bookNumber: "BN-006" },
-    { id: 7, title: "জোৎস্না ও জলপরী", author: "সৈয়দ শামসুল হক", category: "কবিতা", total: 2, available: 2, bookNumber: "BN-007" },
-    { id: 8, title: "বাংলাদেশের ইতিহাস", author: "সিরাজুল ইসলাম", category: "ইতিহাস", total: 5, available: 4, bookNumber: "BN-008" },
-    { id: 9, title: "গণিতের মজা", author: "মোহাম্মদ জাফর ইকবাল", category: "বিজ্ঞান", total: 3, available: 3, bookNumber: "BN-009" },
-    { id: 10, title: "আলো হে উজ্জ্বল আলো", author: "জসীমউদ্দীন", category: "কবিতা", total: 2, available: 1, bookNumber: "BN-010" },
-    { id: 11, title: "মেঘে ঢাকা তারা", author: "শওকত ওসমান", category: "উপন্যাস", total: 3, available: 0, bookNumber: "BN-011" },
-    { id: 12, title: "ফিজিক্স প্রথম পত্র", author: "ড. আবদুল গফুর", category: "শিক্ষা", total: 8, available: 5, bookNumber: "BN-012" },
-];
-
-const defaultReaders = [
-    { id: 1, name: "রাহুল ইসলাম", className: "দশম শ্রেণি", roll: "০৫", phone: "০১৭১২৩৪৫৬৭৮", address: "ধানমন্ডি, ঢাকা", joinDate: "২০২৪-০১-১৫", color: "#1B4332" },
-    { id: 2, name: "ফাতেমা আক্তার", className: "নবম শ্রেণি", roll: "১২", phone: "০১৮১২৩৪৫৬৭৮", address: "মিরপুর, ঢাকা", joinDate: "২০২৪-০২-০১", color: "#C8602A" },
-    { id: 3, name: "সাকিব হাসান", className: "একাদশ শ্রেণি", roll: "০৩", phone: "০১৬১২৩৪৫৬৭৮", address: "উত্তরা, ঢাকা", joinDate: "২০২৪-০১-২০", color: "#7B2D8E" },
-    { id: 4, name: "নুসরাত জাহান", className: "অষ্টম শ্রেণি", roll: "০৮", phone: "০১৫১২৩৪৫৬৭৮", address: "মোহাম্মদপুর, ঢাকা", joinDate: "২০২৪-০৩-১০", color: "#2D6A4F" },
-    { id: 5, name: "তানভীর আহমেদ", className: "দ্বাদশ শ্রেণি", roll: "০১", phone: "০১৯১২৩৪৫৬৭৮", address: "শাহবাগ, ঢাকা", joinDate: "২০২৩-১১-০৫", color: "#9C4221" },
-];
-
-const defaultTransactions = [
-    { id: 1, readerId: 1, bookId: 1, issueDate: "২০২৫-০১-১০", dueDate: "২০২৫-০১-২৫", returnDate: "২০২৫-০১-২২", status: "returned" },
-    { id: 2, readerId: 1, bookId: 4, issueDate: "২০২৫-০১-২৬", dueDate: "২০২৫-০২-১০", returnDate: null, status: "issued" },
-    { id: 3, readerId: 2, bookId: 5, issueDate: "২০২৫-০১-১৫", dueDate: "২০২৫-০১-৩০", returnDate: null, status: "issued" },
-    { id: 4, readerId: 3, bookId: 2, issueDate: "২০২৫-০২-০১", dueDate: "২০২৫-০২-১৬", returnDate: "২০২৫-০২-১৪", status: "returned" },
-    { id: 5, readerId: 3, bookId: 11, issueDate: "২০২৫-০২-১৭", dueDate: "২০২৫-০৩-০৪", returnDate: null, status: "issued" },
-    { id: 6, readerId: 3, bookId: 11, issueDate: "২০২৫-০২-১৭", dueDate: "২০২৫-০৩-০৪", returnDate: null, status: "issued" },
-    { id: 7, readerId: 3, bookId: 11, issueDate: "২০২৫-০২-১৭", dueDate: "২০২৫-০৩-০৪", returnDate: null, status: "issued" },
-    { id: 8, readerId: 5, bookId: 1, issueDate: "২০২৫-০২-০৫", dueDate: "২০২৫-০২-২০", returnDate: "২০২৫-০২-১৮", status: "returned" },
-    { id: 9, readerId: 5, bookId: 10, issueDate: "২০২৫-০২-২১", dueDate: "২০২৫-০৩-০৮", returnDate: null, status: "issued" },
-    { id: 10, readerId: 4, bookId: 6, issueDate: "২০২৫-০২-১০", dueDate: "২০২৫-০২-২৫", returnDate: null, status: "issued" },
-    { id: 11, readerId: 4, bookId: 1, issueDate: "২০২৫-০২-১০", dueDate: "২০২৫-০২-২৫", returnDate: null, status: "issued" },
-];
-
-// Firebase-এ ডেটা সেভ করা
-function saveData(key, data) {
-    db.ref(key).set(data).catch(err => {
-        console.error(err);
-        showToast('ডেটা সংরক্ষণ ব্যর্থ হয়েছে: ' + err.message, 'error');
-    });
-}
-
-let books = [];
-let readers = [];
-let transactions = [];
-let currentPage = 'dashboard';
-let currentReaderId = null;
-let readerTab = 'profile';
-
-function nextId(arr) { return arr.length > 0 ? Math.max(...arr.map(i => i.id)) + 1 : 1; }
-function nextBookNumber() {
-    const max = books.reduce((m, b) => { const n = parseInt(b.bookNumber.replace('BN-','')); return n > m ? n : m; }, 0);
-    return 'BN-' + String(max + 1).padStart(3, '0');
-}
-
-// ==================== টোস্ট ====================
-function showToast(msg, type = 'success') {
-    const c = document.getElementById('toastContainer');
-    const t = document.createElement('div');
-    t.className = `toast ${type}`;
-    const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle';
-    t.innerHTML = `<i class="fas fa-${icon}"></i> ${msg}`;
-    c.appendChild(t);
-    requestAnimationFrame(() => t.classList.add('show'));
-    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
-}
-
-// ==================== মোডাল ====================
-function openModal(html) {
-    document.getElementById('modalBox').innerHTML = html;
-    document.getElementById('modalBackdrop').classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-    document.getElementById('modalBackdrop').classList.remove('active');
-    document.body.style.overflow = '';
-}
-
-// ==================== সাইডবার ====================
-function toggleSidebar() {
-    const sb = document.getElementById('sidebar');
-    const ov = document.getElementById('sidebarOverlay');
-    sb.classList.toggle('open');
-    ov.classList.toggle('active');
-}
-
-function checkMobile() {
-    const btn = document.getElementById('menuBtn');
-    btn.style.display = window.innerWidth <= 768 ? 'block' : 'none';
-}
-window.addEventListener('resize', checkMobile);
-checkMobile();
-
-// ==================== নেভিগেশন ====================
-function navigateTo(page, readerId) {
-    currentPage = page;
-    currentReaderId = readerId || null;
-    readerTab = 'profile';
-
-    document.querySelectorAll('.nav-item').forEach(n => {
-        n.classList.toggle('active', n.dataset.page === page);
-    });
-
-    const titles = { dashboard: 'ড্যাশবোর্ড', books: 'বই সমূহ', readers: 'রিডার সমূহ', issueReturn: 'ইস্যু / রিটার্ন', history: 'ইতিহাস', readerDetail: 'রিডার প্রোফাইল' };
-    document.getElementById('pageTitle').textContent = titles[page] || 'ড্যাশবোর্ড';
-
-    if (window.innerWidth <= 768) {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('sidebarOverlay').classList.remove('active');
-    }
-
-    renderPage();
-}
-
-function renderPage() {
-    const c = document.getElementById('pageContent');
-    switch(currentPage) {
-        case 'dashboard': c.innerHTML = renderDashboard(); break;
-        case 'books': c.innerHTML = renderBooks(); break;
-        case 'readers': c.innerHTML = renderReaders(); break;
-        case 'issueReturn': c.innerHTML = renderIssueReturn(); break;
-        case 'history': c.innerHTML = renderHistory(); break;
-        case 'readerDetail': c.innerHTML = renderReaderDetail(); break;
-    }
-}
-
-// ==================== ড্যাশবোর্ড ====================
-function renderDashboard() {
-    const totalBooks = books.reduce((s, b) => s + b.total, 0);
-    const availableBooks = books.reduce((s, b) => s + b.available, 0);
-    const issuedBooks = totalBooks - availableBooks;
-    const totalReaders = readers.length;
-    const currentIssued = transactions.filter(t => t.status === 'issued').length;
-
-    const recent = [...transactions].reverse().slice(0, 5);
-
-    const catMap = {};
-    books.forEach(b => { catMap[b.category] = (catMap[b.category] || 0) + b.total; });
-
-    return `
-    <div style="position:relative;overflow:hidden;">
-        <div class="float-shape" style="width:200px;height:200px;background:var(--primary);top:-60px;right:-40px;"></div>
-        <div class="float-shape" style="width:120px;height:120px;background:var(--accent);bottom:40px;left:-30px;animation-delay:2s;"></div>
-
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px;position:relative;z-index:1;">
-            <div class="stat-card green animate-in delay-1">
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                    <div>
-                        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;">মোট বই</div>
-                        <div style="font-size:32px;font-weight:900;color:var(--primary);line-height:1;">${totalBooks}</div>
-                    </div>
-                    <div style="width:48px;height:48px;background:rgba(27,67,50,0.1);border-radius:14px;display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-book" style="color:var(--primary);font-size:20px;"></i>
-                    </div>
+        <!-- ===== হোম ভিউ ===== -->
+        <div id="view-home" class="view active">
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-total">০</div>
+                    <div class="stat-label">মোট বই</div>
                 </div>
-                <div style="font-size:11px;color:var(--muted);margin-top:8px;">${books.length}টি ভিন্ন শিরোনাম</div>
-            </div>
-            <div class="stat-card orange animate-in delay-2">
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                    <div>
-                        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;">ইস্যুকৃত বই</div>
-                        <div style="font-size:32px;font-weight:900;color:var(--accent);line-height:1;">${issuedBooks}</div>
-                    </div>
-                    <div style="width:48px;height:48px;background:rgba(200,96,42,0.1);border-radius:14px;display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-hand-holding" style="color:var(--accent);font-size:20px;"></i>
-                    </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-issued">০</div>
+                    <div class="stat-label">ইস্যুকৃত</div>
                 </div>
-                <div style="font-size:11px;color:var(--muted);margin-top:8px;">${availableBooks}টি এখন পাওয়া যাচ্ছে</div>
-            </div>
-            <div class="stat-card yellow animate-in delay-3">
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                    <div>
-                        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;">মোট রিডার</div>
-                        <div style="font-size:32px;font-weight:900;color:#B8860B;line-height:1;">${totalReaders}</div>
-                    </div>
-                    <div style="width:48px;height:48px;background:rgba(184,134,11,0.1);border-radius:14px;display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-users" style="color:#B8860B;font-size:20px;"></i>
-                    </div>
-                </div>
-                <div style="font-size:11px;color:var(--muted);margin-top:8px;">সক্রিয় সদস্য</div>
-            </div>
-            <div class="stat-card red animate-in delay-4">
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                    <div>
-                        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;">বর্তমানে ইস্যু</div>
-                        <div style="font-size:32px;font-weight:900;color:var(--danger);line-height:1;">${currentIssued}</div>
-                    </div>
-                    <div style="width:48px;height:48px;background:rgba(231,111,81,0.1);border-radius:14px;display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-exchange-alt" style="color:var(--danger);font-size:20px;"></i>
-                    </div>
-                </div>
-                <div style="font-size:11px;color:var(--muted);margin-top:8px;">ফেরত দেওয়া বাকি</div>
-            </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;position:relative;z-index:1;" class="dashboard-grid">
-            <div class="card animate-in delay-2" style="grid-column:span 1;">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                    <h3 style="font-size:15px;font-weight:800;color:var(--primary);">সাম্প্রতিক কার্যক্রম</h3>
-                    <button class="btn-outline" onclick="navigateTo('history')" style="font-size:11px;padding:5px 12px;">
-                        <i class="fas fa-arrow-right"></i> সব দেখুন
-                    </button>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:10px;">
-                    ${recent.map(t => {
-                        const reader = readers.find(r => r.id === t.readerId);
-                        const book = books.find(b => b.id === t.bookId);
-                        const isReturn = t.status === 'returned';
-                        return `
-                        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;background:${isReturn ? 'rgba(64,145,108,0.06)' : 'rgba(200,96,42,0.06)'};">
-                            <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:${isReturn ? 'rgba(64,145,108,0.15)' : 'rgba(200,96,42,0.15)'};">
-                                <i class="fas fa-${isReturn ? 'arrow-rotate-left' : 'arrow-right-from-bracket'}" style="font-size:14px;color:${isReturn ? 'var(--success)' : 'var(--accent)'}"></i>
-                            </div>
-                            <div style="flex:1;min-width:0;">
-                                <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${reader ? reader.name : 'অজানা'}</div>
-                                <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${book ? book.title : 'অজানা'}</div>
-                            </div>
-                            <span class="badge ${isReturn ? 'badge-green' : 'badge-orange'}">${isReturn ? 'ফেরত' : 'ইস্যু'}</span>
-                        </div>`;
-                    }).join('')}
-                    ${recent.length === 0 ? '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">কোনো কার্যক্রম নেই</div>' : ''}
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-available">০</div>
+                    <div class="stat-label">প্রাপ্য</div>
                 </div>
             </div>
 
-            <div class="card animate-in delay-3" style="grid-column:span 1;">
-                <h3 style="font-size:15px;font-weight:800;color:var(--primary);margin-bottom:16px;">ক্যাটাগরি অনুযায়ী বই</h3>
-                <div style="display:flex;flex-direction:column;gap:12px;">
-                    ${Object.entries(catMap).sort((a,b) => b[1]-a[1]).map(([cat, count]) => {
-                        const pct = Math.round((count / totalBooks) * 100);
-                        const colors = ['#1B4332','#C8602A','#B8860B','#2D6A4F','#7B2D8E','#9C4221'];
-                        const ci = Object.keys(catMap).indexOf(cat) % colors.length;
-                        return `
-                        <div>
-                            <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
-                                <span style="font-size:13px;font-weight:600;">${cat}</span>
-                                <span style="font-size:12px;color:var(--muted);">${count}টি (${pct}%)</span>
-                            </div>
-                            <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
-                                <div style="height:100%;width:${pct}%;background:${colors[ci]};border-radius:4px;transition:width 0.8s ease;"></div>
-                            </div>
-                        </div>`;
-                    }).join('')}
+            <div class="quick-actions">
+                <div class="quick-action-btn" onclick="window.navigateTo('books');setTimeout(()=>window.handleFabClick(),300)">
+                    <div class="qa-icon blue"><i class="fas fa-plus"></i></div>
+                    <div><div class="qa-text">নতুন বই</div><div class="qa-sub">বই যোগ করুন</div></div>
+                </div>
+                <div class="quick-action-btn" onclick="window.navigateTo('readers');setTimeout(()=>window.handleFabClick(),300)">
+                    <div class="qa-icon red"><i class="fas fa-user-plus"></i></div>
+                    <div><div class="qa-text">নতুন রিডার</div><div class="qa-sub">রিডার যোগ করুন</div></div>
                 </div>
             </div>
-        </div>
-    </div>
-    <style>
-        @media (max-width: 768px) {
-            .dashboard-grid { grid-template-columns: 1fr !important; }
-            .dashboard-grid > * { grid-column: span 1 !important; }
-        }
-    </style>`;
-}
 
-// ==================== বই পেজ ====================
-function renderBooks() {
-    return `
-    <div class="animate-in">
-        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;">
-            <div class="search-bar" style="flex:1;min-width:200px;max-width:360px;">
+            <div class="section-title"><i class="fas fa-book-open"></i> সাম্প্রতিক বই</div>
+            <div id="home-books-list"><div class="spinner"></div></div>
+        </div>
+
+        <!-- ===== বই ভিউ ===== -->
+        <div id="view-books" class="view">
+            <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input class="form-input" id="bookSearch" placeholder="বই খুঁজুন..." oninput="filterBooks()" style="padding-left:40px;">
+                <input type="text" id="book-search" placeholder="বই খুঁজুন (নাম বা লেখক)...">
             </div>
-            <button class="btn-primary" onclick="openBookModal()">
-                <i class="fas fa-plus"></i> নতুন বই যোগ করুন
-            </button>
+            <div id="books-list"><div class="spinner"></div></div>
         </div>
-        <div class="card table-wrap" style="padding:0;overflow:hidden;">
-            <table class="data-table" id="booksTable">
-                <thead>
-                    <tr>
-                        <th>নং</th>
-                        <th>বই নম্বর</th>
-                        <th>বইয়ের নাম</th>
-                        <th>লেখক</th>
-                        <th>ক্যাটাগরি</th>
-                        <th>মোট</th>
-                        <th>পাওয়া যাচ্ছে</th>
-                        <th>অ্যাকশন</th>
-                    </tr>
-                </thead>
-                <tbody id="booksBody"></tbody>
-            </table>
-        </div>
-    </div>`;
-}
 
-function filterBooks() {
-    const q = document.getElementById('bookSearch').value.toLowerCase();
-    const filtered = books.filter(b =>
-        b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q) || b.category.toLowerCase().includes(q) || b.bookNumber.toLowerCase().includes(q)
-    );
-    renderBooksTable(filtered);
-}
-
-function renderBooksTable(list) {
-    const tbody = document.getElementById('booksBody');
-    if (!tbody) return;
-    if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted);">কোনো বই পাওয়া যায়নি</td></tr>`;
-        return;
-    }
-    tbody.innerHTML = list.map((b, i) => `
-        <tr>
-            <td style="font-weight:600;color:var(--muted);">${i + 1}</td>
-            <td><span style="background:rgba(27,67,50,0.08);padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;color:var(--primary);">${b.bookNumber}</span></td>
-            <td style="font-weight:600;">${b.title}</td>
-            <td style="color:var(--muted);font-size:13px;">${b.author}</td>
-            <td><span class="badge badge-blue">${b.category}</span></td>
-            <td style="font-weight:700;text-align:center;">${b.total}</td>
-            <td style="text-align:center;">
-                <span style="font-weight:700;color:${b.available > 0 ? 'var(--success)' : 'var(--danger)'};">${b.available}</span>
-            </td>
-            <td>
-                <div style="display:flex;gap:6px;">
-                    <button class="btn-sm" style="background:rgba(27,67,50,0.1);color:var(--primary);" onclick="openBookModal(${b.id})" title="সম্পাদনা">
-                        <i class="fas fa-pen" style="font-size:11px;"></i>
-                    </button>
-                    <button class="btn-sm" style="background:rgba(231,111,81,0.1);color:var(--danger);" onclick="deleteBook(${b.id})" title="মুছুন">
-                        <i class="fas fa-trash" style="font-size:11px;"></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function openBookModal(id) {
-    const book = id ? books.find(b => b.id === id) : null;
-    const isEdit = !!book;
-    openModal(`
-        <h3 style="font-size:18px;font-weight:800;color:var(--primary);margin-bottom:20px;">${isEdit ? 'বই সম্পাদনা করুন' : 'নতুন বই যোগ করুন'}</h3>
-        <form onsubmit="return saveBook(event, ${id || 0})">
-            <div style="display:grid;gap:14px;">
-                <div>
-                    <label class="form-label">বইয়ের নাম</label>
-                    <input class="form-input" id="mBookTitle" value="${isEdit ? book.title : ''}" required>
-                </div>
-                <div>
-                    <label class="form-label">লেখক</label>
-                    <input class="form-input" id="mBookAuthor" value="${isEdit ? book.author : ''}" required>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div>
-                        <label class="form-label">ক্যাটাগরি</label>
-                        <input class="form-input" id="mBookCategory" value="${isEdit ? book.category : ''}" placeholder="যেমন: উপন্যাস" required>
-                    </div>
-                    <div>
-                        <label class="form-label">বই নম্বর</label>
-                        <input class="form-input" id="mBookNumber" value="${isEdit ? book.bookNumber : nextBookNumber()}" required>
-                    </div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div>
-                        <label class="form-label">মোট সংখ্যা</label>
-                        <input class="form-input" id="mBookTotal" type="number" min="1" value="${isEdit ? book.total : 1}" required>
-                    </div>
-                    <div>
-                        <label class="form-label">বর্তমানে পাওয়া যাচ্ছে</label>
-                        <input class="form-input" id="mBookAvail" type="number" min="0" max="${isEdit ? book.total : 1}" value="${isEdit ? book.available : 1}" required>
-                    </div>
-                </div>
-            </div>
-            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px;">
-                <button type="button" class="btn-outline" onclick="closeModal()">বাতিল</button>
-                <button type="submit" class="btn-primary">${isEdit ? 'আপডেট করুন' : 'সংরক্ষণ করুন'}</button>
-            </div>
-        </form>
-    `);
-}
-
-function saveBook(e, id) {
-    e.preventDefault();
-    const title = document.getElementById('mBookTitle').value.trim();
-    const author = document.getElementById('mBookAuthor').value.trim();
-    const category = document.getElementById('mBookCategory').value.trim();
-    const bookNumber = document.getElementById('mBookNumber').value.trim();
-    const total = parseInt(document.getElementById('mBookTotal').value);
-    const available = parseInt(document.getElementById('mBookAvail').value);
-
-    if (available > total) { showToast('পাওয়া যাচ্ছে মোটের চেয়ে বেশি হতে পারে না', 'error'); return false; }
-
-    if (id) {
-        const book = books.find(b => b.id === id);
-        Object.assign(book, { title, author, category, bookNumber, total, available });
-        showToast('বই আপডেট হয়েছে');
-    } else {
-        books.push({ id: nextId(books), title, author, category, bookNumber, total, available });
-        showToast('নতুন বই যোগ হয়েছে');
-    }
-    saveData('lib_books', books);
-    closeModal();
-    renderPage();
-    setTimeout(() => { filterBooks(); }, 50);
-    return false;
-}
-
-function deleteBook(id) {
-    const book = books.find(b => b.id === id);
-    openModal(`
-        <div style="text-align:center;padding:10px 0;">
-            <div style="width:56px;height:56px;background:rgba(231,111,81,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-                <i class="fas fa-trash" style="color:var(--danger);font-size:22px;"></i>
-            </div>
-            <h3 style="font-size:17px;font-weight:800;color:var(--fg);margin-bottom:8px;">বই মুছে ফেলুন?</h3>
-            <p style="font-size:13px;color:var(--muted);margin-bottom:24px;">"${book.title}" — এই বইটি মুছে ফেলা হবে।</p>
-            <div style="display:flex;gap:10px;justify-content:center;">
-                <button class="btn-outline" onclick="closeModal()">না</button>
-                <button class="btn-danger" style="padding:10px 24px;font-size:14px;" onclick="confirmDeleteBook(${id})">হ্যাঁ, মুছুন</button>
-            </div>
-        </div>
-    `);
-}
-function confirmDeleteBook(id) {
-    books = books.filter(b => b.id !== id);
-    saveData('lib_books', books);
-    closeModal();
-    showToast('বই মুছে ফেলা হয়েছে');
-    renderPage();
-    setTimeout(() => filterBooks(), 50);
-}
-
-// ==================== রিডার পেজ ====================
-function renderReaders() {
-    return `
-    <div class="animate-in">
-        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;">
-            <div class="search-bar" style="flex:1;min-width:200px;max-width:360px;">
+        <!-- ===== রিডার ভিউ ===== -->
+        <div id="view-readers" class="view">
+            <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input class="form-input" id="readerSearch" placeholder="রিডার খুঁজুন..." oninput="filterReaders()" style="padding-left:40px;">
+                <input type="text" id="reader-search" placeholder="রিডার খুঁজুন (নাম বা ফোন)...">
             </div>
-            <button class="btn-primary" onclick="openReaderModal()">
-                <i class="fas fa-user-plus"></i> নতুন রিডার যোগ করুন
-            </button>
+            <div id="readers-list"><div class="spinner"></div></div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;" id="readerGrid"></div>
-    </div>`;
-}
 
-function filterReaders() {
-    const q = document.getElementById('readerSearch').value.toLowerCase();
-    const filtered = readers.filter(r =>
-        r.name.toLowerCase().includes(q) || r.className.toLowerCase().includes(q) || r.roll.includes(q)
-    );
-    renderReaderGrid(filtered);
-}
+        <!-- ===== রিডার ডিটেইল ভিউ ===== -->
+        <div id="view-reader-detail" class="view">
+            <button class="back-btn" onclick="navigateTo('readers')">
+                <i class="fas fa-arrow-left"></i> ফিরে যান
+            </button>
+            <div id="reader-detail-content"><div class="spinner"></div></div>
+        </div>
 
-function renderReaderGrid(list) {
-    const grid = document.getElementById('readerGrid');
-    if (!grid) return;
-    if (list.length === 0) {
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);">কোনো রিডার পাওয়া যায়নি</div>`;
-        return;
-    }
-    grid.innerHTML = list.map(r => {
-        const issued = transactions.filter(t => t.readerId === r.id && t.status === 'issued').length;
-        const totalRead = transactions.filter(t => t.readerId === r.id && t.status === 'returned').length;
-        const initials = r.name.split(' ').map(w => w[0]).join('').substring(0, 2);
-        return `
-        <div class="reader-card" onclick="navigateTo('readerDetail', ${r.id})">
-            <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
-                <div class="reader-avatar" style="background:${r.color};">${initials}</div>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-size:15px;font-weight:800;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.name}</div>
-                    <div style="font-size:12px;color:var(--muted);">${r.className} — রোল: ${r.roll}</div>
-                </div>
+        <!-- ===== বটম নেভ ===== -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-view="home" onclick="navigateTo('home')">
+                <i class="fas fa-home"></i><span>হোম</span>
+            </button>
+            <button class="nav-btn" data-view="books" onclick="navigateTo('books')">
+                <i class="fas fa-book"></i><span>বই</span>
+            </button>
+            <button class="nav-btn" data-view="readers" onclick="navigateTo('readers')">
+                <i class="fas fa-users"></i><span>রিডার</span>
+            </button>
+        </nav>
+
+        <!-- ===== FAB ===== -->
+        <button class="fab" id="fab-btn" onclick="handleFabClick()"><i class="fas fa-plus"></i></button>
+    </div>
+
+    <!-- ===== মোডাল: নতুন বই ===== -->
+    <div class="modal-overlay" id="modal-add-book">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3><i class="fas fa-book-medical" style="margin-right:6px;color:var(--accent)"></i>নতুন বই যোগ করুন</h3>
+                <button class="modal-close" onclick="closeModal('modal-add-book')"><i class="fas fa-times"></i></button>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                <div style="background:rgba(200,96,42,0.08);padding:10px;border-radius:10px;text-align:center;">
-                    <div style="font-size:20px;font-weight:900;color:var(--accent);">${issued}</div>
-                    <div style="font-size:10px;font-weight:600;color:var(--muted);">বর্তমানে নিয়েছে</div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">বইয়ের নাম *</label>
+                    <input type="text" class="form-input" id="new-book-title" placeholder="বইয়ের নাম লিখুন">
                 </div>
-                <div style="background:rgba(64,145,108,0.08);padding:10px;border-radius:10px;text-align:center;">
-                    <div style="font-size:20px;font-weight:900;color:var(--success);">${totalRead}</div>
-                    <div style="font-size:10px;font-weight:600;color:var(--muted);">মোট পড়েছে</div>
+                <div class="form-group">
+                    <label class="form-label">লেখক *</label>
+                    <input type="text" class="form-input" id="new-book-author" placeholder="লেখকের নাম লিখুন">
                 </div>
+                <div class="form-group">
+                    <label class="form-label">বিভাগ</label>
+                    <input type="text" class="form-input" id="new-book-category" placeholder="যেমন: উপন্যাস, কবিতা, ইসলামিক">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">মোট কপি সংখ্যা *</label>
+                    <input type="number" class="form-input" id="new-book-total" placeholder="কপি সংখ্যা" min="1" value="1">
+                </div>
+                <button class="btn btn-primary btn-block" onclick="addBook()"><i class="fas fa-plus"></i> বই যোগ করুন</button>
             </div>
-        </div>`;
-    }).join('');
-}
+        </div>
+    </div>
 
-function openReaderModal(id) {
-    const reader = id ? readers.find(r => r.id === id) : null;
-    const isEdit = !!reader;
-    const colors = ['#1B4332','#C8602A','#7B2D8E','#2D6A4F','#9C4221','#B8860B','#1A5276','#8B4513'];
-    openModal(`
-        <h3 style="font-size:18px;font-weight:800;color:var(--primary);margin-bottom:20px;">${isEdit ? 'রিডার সম্পাদনা' : 'নতুন রিডার যোগ করুন'}</h3>
-        <form onsubmit="return saveReader(event, ${id || 0})">
-            <div style="display:grid;gap:14px;">
-                <div>
-                    <label class="form-label">নাম</label>
-                    <input class="form-input" id="mReaderName" value="${isEdit ? reader.name : ''}" required>
+    <!-- ===== মোডাল: নতুন রিডার ===== -->
+    <div class="modal-overlay" id="modal-add-reader">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus" style="margin-right:6px;color:var(--accent)"></i>নতুন রিডার যোগ করুন</h3>
+                <button class="modal-close" onclick="closeModal('modal-add-reader')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="photo-upload" id="reader-photo-upload" onclick="document.getElementById('reader-photo-input').click()">
+                    <i class="fas fa-camera"></i><span>ছবি</span>
+                    <div class="change-overlay">পরিবর্তন</div>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div>
-                        <label class="form-label">ক্লাস</label>
-                        <input class="form-input" id="mReaderClass" value="${isEdit ? reader.className : ''}" placeholder="যেমন: দশম শ্রেণি" required>
-                    </div>
-                    <div>
-                        <label class="form-label">রোল নম্বর</label>
-                        <input class="form-input" id="mReaderRoll" value="${isEdit ? reader.roll : ''}" required>
-                    </div>
+                <input type="file" id="reader-photo-input" accept="image/*" style="display:none" onchange="handlePhotoSelect(event)">
+                <div class="form-group">
+                    <label class="form-label">নাম *</label>
+                    <input type="text" class="form-input" id="new-reader-name" placeholder="রিডারের নাম লিখুন">
                 </div>
-                <div>
-                    <label class="form-label">ফোন নম্বর</label>
-                    <input class="form-input" id="mReaderPhone" value="${isEdit ? reader.phone : ''}" required>
+                <div class="form-group">
+                    <label class="form-label">ফোন নম্বর *</label>
+                    <input type="tel" class="form-input" id="new-reader-phone" placeholder="ফোন নম্বর লিখুন">
                 </div>
-                <div>
+                <div class="form-group">
                     <label class="form-label">ঠিকানা</label>
-                    <input class="form-input" id="mReaderAddress" value="${isEdit ? reader.address : ''}" required>
+                    <textarea class="form-textarea" id="new-reader-address" placeholder="ঠিকানা লিখুন"></textarea>
                 </div>
-                ${!isEdit ? `
-                <div>
-                    <label class="form-label">রঙ নির্বাচন করুন</label>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        ${colors.map((c, i) => `
-                            <div onclick="document.querySelectorAll('.color-pick').forEach(e=>e.style.outline='none');this.style.outline='3px solid var(--fg)';this.style.outlineOffset='2px';document.getElementById('mReaderColor').value='${c}';"
-                                class="color-pick" style="width:32px;height:32px;border-radius:50%;background:${c};cursor:pointer;${i===0?'outline:3px solid var(--fg);outline-offset:2px;':''}"></div>
-                        `).join('')}
-                    </div>
-                    <input type="hidden" id="mReaderColor" value="${colors[0]}">
-                </div>` : `<input type="hidden" id="mReaderColor" value="${reader.color}">`}
-            </div>
-            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px;">
-                <button type="button" class="btn-outline" onclick="closeModal()">বাতিল</button>
-                <button type="submit" class="btn-primary">${isEdit ? 'আপডেট করুন' : 'সংরক্ষণ করুন'}</button>
-            </div>
-        </form>
-    `);
-}
-
-function saveReader(e, id) {
-    e.preventDefault();
-    const name = document.getElementById('mReaderName').value.trim();
-    const className = document.getElementById('mReaderClass').value.trim();
-    const roll = document.getElementById('mReaderRoll').value.trim();
-    const phone = document.getElementById('mReaderPhone').value.trim();
-    const address = document.getElementById('mReaderAddress').value.trim();
-    const color = document.getElementById('mReaderColor').value;
-
-    if (id) {
-        const reader = readers.find(r => r.id === id);
-        Object.assign(reader, { name, className, roll, phone, address });
-        showToast('রিডার তথ্য আপডেট হয়েছে');
-    } else {
-        const now = new Date();
-        const bnDate = toBanglaDate(now);
-        readers.push({ id: nextId(readers), name, className, roll, phone, address, joinDate: bnDate, color });
-        showToast('নতুন রিডার যোগ হয়েছে');
-    }
-    saveData('lib_readers', readers);
-    closeModal();
-    renderPage();
-    setTimeout(() => filterReaders(), 50);
-    return false;
-}
-
-function deleteReader(id) {
-    const reader = readers.find(r => r.id === id);
-    const issued = transactions.filter(t => t.readerId === id && t.status === 'issued').length;
-    if (issued > 0) { showToast('এই রিডারের ইস্যুকৃত বই আছে, আগে ফেরত দিন', 'error'); return; }
-    openModal(`
-        <div style="text-align:center;padding:10px 0;">
-            <div style="width:56px;height:56px;background:rgba(231,111,81,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-                <i class="fas fa-user-minus" style="color:var(--danger);font-size:22px;"></i>
-            </div>
-            <h3 style="font-size:17px;font-weight:800;color:var(--fg);margin-bottom:8px;">রিডার মুছে ফেলুন?</h3>
-            <p style="font-size:13px;color:var(--muted);margin-bottom:24px;">"${reader.name}" — এই রিডারকে মুছে ফেলা হবে।</p>
-            <div style="display:flex;gap:10px;justify-content:center;">
-                <button class="btn-outline" onclick="closeModal()">না</button>
-                <button class="btn-danger" style="padding:10px 24px;font-size:14px;" onclick="confirmDeleteReader(${id})">হ্যাঁ, মুছুন</button>
-            </div>
-        </div>
-    `);
-}
-function confirmDeleteReader(id) {
-    readers = readers.filter(r => r.id !== id);
-    transactions = transactions.filter(t => t.readerId !== id);
-    saveData('lib_readers', readers);
-    saveData('lib_transactions', transactions);
-    closeModal();
-    showToast('রিডার মুছে ফেলা হয়েছে');
-    navigateTo('readers');
-}
-
-// ==================== রিডার ডিটেইল/প্রোফাইল ====================
-function renderReaderDetail() {
-    const reader = readers.find(r => r.id === currentReaderId);
-    if (!reader) return `<div style="text-align:center;padding:60px;color:var(--muted);">রিডার পাওয়া যায়নি</div>`;
-
-    const issuedTx = transactions.filter(t => t.readerId === reader.id && t.status === 'issued');
-    const returnedTx = transactions.filter(t => t.readerId === reader.id && t.status === 'returned');
-    const initials = reader.name.split(' ').map(w => w[0]).join('').substring(0, 2);
-    const allTx = transactions.filter(t => t.readerId === reader.id);
-
-    let tabContent = '';
-    if (readerTab === 'profile') {
-        tabContent = `
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px;">
-            <div class="card" style="text-align:center;">
-                <div style="font-size:28px;font-weight:900;color:var(--accent);">${issuedTx.length}</div>
-                <div style="font-size:12px;color:var(--muted);font-weight:600;">বর্তমানে নিয়েছে</div>
-            </div>
-            <div class="card" style="text-align:center;">
-                <div style="font-size:28px;font-weight:900;color:var(--success);">${returnedTx.length}</div>
-                <div style="font-size:12px;color:var(--muted);font-weight:600;">মোট পড়েছে</div>
-            </div>
-            <div class="card" style="text-align:center;">
-                <div style="font-size:28px;font-weight:900;color:var(--primary);">${allTx.length}</div>
-                <div style="font-size:12px;color:var(--muted);font-weight:600;">মোট ট্রানজেকশন</div>
-            </div>
-        </div>
-        <div class="card">
-            <h4 style="font-size:14px;font-weight:800;color:var(--primary);margin-bottom:14px;">ব্যক্তিগত তথ্য</h4>
-            <div style="display:grid;gap:12px;">
-                ${[
-                    ['fa-graduation-cap', 'ক্লাস', reader.className],
-                    ['fa-id-card', 'রোল নম্বর', reader.roll],
-                    ['fa-phone', 'ফোন', reader.phone],
-                    ['fa-location-dot', 'ঠিকানা', reader.address],
-                    ['fa-calendar', 'যোগদানের তারিখ', reader.joinDate],
-                ].map(([icon, label, val]) => `
-                    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#FAFAF7;border-radius:10px;">
-                        <div style="width:36px;height:36px;background:rgba(27,67,50,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <i class="fas ${icon}" style="color:var(--primary);font-size:14px;"></i>
-                        </div>
-                        <div>
-                            <div style="font-size:11px;color:var(--muted);font-weight:600;">${label}</div>
-                            <div style="font-size:14px;font-weight:600;">${val}</div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        </div>`;
-    } else if (readerTab === 'issued') {
-        if (issuedTx.length === 0) {
-            tabContent = `<div class="card" style="text-align:center;padding:50px;color:var(--muted);"><i class="fas fa-book-open" style="font-size:36px;margin-bottom:12px;opacity:0.3;display:block;"></i>কোনো বই নেওয়া হয়নি</div>`;
-        } else {
-            tabContent = `
-            <div style="display:flex;flex-direction:column;gap:12px;">
-                ${issuedTx.map(t => {
-                    const book = books.find(b => b.id === t.bookId);
-                    return `
-                    <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-                        <div style="width:44px;height:44px;background:rgba(200,96,42,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <i class="fas fa-book" style="color:var(--accent);font-size:16px;"></i>
-                        </div>
-                        <div style="flex:1;min-width:150px;">
-                            <div style="font-size:14px;font-weight:700;">${book ? book.title : 'অজানা'}</div>
-                            <div style="font-size:12px;color:var(--muted);">${book ? book.author : ''} — ${book ? book.bookNumber : ''}</div>
-                        </div>
-                        <div style="text-align:right;min-width:120px;">
-                            <div style="font-size:11px;color:var(--muted);">ইস্যু: ${t.issueDate}</div>
-                            <div style="font-size:11px;color:var(--danger);font-weight:600;">ডিউ: ${t.dueDate}</div>
-                        </div>
-                        <button class="btn-accent" style="font-size:12px;padding:8px 16px;" onclick="returnBook(${t.id})">
-                            <i class="fas fa-rotate-left"></i> ফেরত নিন
-                        </button>
-                    </div>`;
-                }).join('')}
-            </div>`;
-        }
-    } else if (readerTab === 'history') {
-        const sorted = [...allTx].sort((a, b) => b.id - a.id);
-        if (sorted.length === 0) {
-            tabContent = `<div class="card" style="text-align:center;padding:50px;color:var(--muted);"><i class="fas fa-clock-rotate-left" style="font-size:36px;margin-bottom:12px;opacity:0.3;display:block;"></i>কোনো ইতিহাস নেই</div>`;
-        } else {
-            tabContent = `
-            <div class="card table-wrap" style="padding:0;overflow:hidden;">
-                <table class="data-table">
-                    <thead><tr><th>বই</th><th>ইস্যু তারিখ</th><th>ডিউ তারিখ</th><th>ফেরত তারিখ</th><th>স্ট্যাটাস</th></tr></thead>
-                    <tbody>
-                        ${sorted.map(t => {
-                            const book = books.find(b => b.id === t.bookId);
-                            return `<tr>
-                                <td style="font-weight:600;">${book ? book.title : 'অজানা'}</td>
-                                <td>${t.issueDate}</td>
-                                <td>${t.dueDate}</td>
-                                <td>${t.returnDate || '—'}</td>
-                                <td><span class="badge ${t.status === 'returned' ? 'badge-green' : 'badge-orange'}">${t.status === 'returned' ? 'ফেরত দেওয়া হয়েছে' : 'ইস্যু আছে'}</span></td>
-                            </tr>`;
-                        }).join('')}
-                    </tbody>
-                </table>
-            </div>`;
-        }
-    }
-
-    return `
-    <div class="animate-in">
-        <button class="btn-outline no-print" onclick="navigateTo('readers')" style="margin-bottom:16px;">
-            <i class="fas fa-arrow-left"></i> রিডার তালিকায় ফিরুন
-        </button>
-
-        <div class="profile-header" style="margin-bottom:20px;">
-            <div style="display:flex;align-items:center;gap:18px;position:relative;z-index:2;flex-wrap:wrap;">
-                <div style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;border:3px solid rgba(255,255,255,0.3);">
-                    ${initials}
-                </div>
-                <div style="flex:1;min-width:150px;">
-                    <h2 style="font-size:24px;font-weight:900;margin-bottom:4px;">${reader.name}</h2>
-                    <div style="font-size:13px;opacity:0.85;">${reader.className} — রোল: ${reader.roll}</div>
-                    <div style="font-size:12px;opacity:0.7;margin-top:2px;">যোগদান: ${reader.joinDate}</div>
-                </div>
-                <div class="no-print" style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <button class="btn-outline" style="border-color:rgba(255,255,255,0.3);color:#fff;background:rgba(255,255,255,0.1);" onclick="openReaderModal(${reader.id})">
-                        <i class="fas fa-pen"></i> সম্পাদনা
-                    </button>
-                    <button class="btn-outline" style="border-color:rgba(255,255,255,0.3);color:#fff;background:rgba(255,255,255,0.1);" onclick="deleteReader(${reader.id})">
-                        <i class="fas fa-trash"></i> মুছুন
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="no-print" style="display:flex;gap:6px;margin-bottom:20px;background:var(--card);padding:6px;border-radius:12px;border:1px solid var(--border);width:fit-content;flex-wrap:wrap;">
-            <button class="tab-btn ${readerTab === 'profile' ? 'active' : ''}" onclick="readerTab='profile';renderPage();">প্রোফাইল</button>
-            <button class="tab-btn ${readerTab === 'issued' ? 'active' : ''}" onclick="readerTab='issued';renderPage();">
-                বর্তমান বই ${issuedTx.length > 0 ? `<span style="background:var(--danger);color:#fff;padding:1px 7px;border-radius:10px;font-size:10px;margin-left:4px;">${issuedTx.length}</span>` : ''}
-            </button>
-            <button class="tab-btn ${readerTab === 'history' ? 'active' : ''}" onclick="readerTab='history';renderPage();">ইতিহাস</button>
-        </div>
-
-        ${tabContent}
-    </div>`;
-}
-
-// ==================== ইস্যু / রিটার্ন পেজ ====================
-function renderIssueReturn() {
-    const issuedList = transactions.filter(t => t.status === 'issued');
-    return `
-    <div class="animate-in">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px;" class="ir-grid">
-            <div class="card">
-                <h3 style="font-size:16px;font-weight:800;color:var(--primary);margin-bottom:18px;">
-                    <i class="fas fa-arrow-right-from-bracket" style="color:var(--accent);margin-right:6px;"></i> বই ইস্যু করুন
-                </h3>
-                <form onsubmit="return issueBook(event)">
-                    <div style="display:grid;gap:14px;">
-                        <div>
-                            <label class="form-label">রিডার নির্বাচন করুন</label>
-                            <select class="form-input" id="issueReader" required>
-                                <option value="">-- রিডার নির্বাচন করুন --</option>
-                                ${readers.map(r => `<option value="${r.id}">${r.name} (${r.className}, রোল: ${r.roll})</option>`).join('')}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="form-label">বই নির্বাচন করুন</label>
-                            <select class="form-input" id="issueBook" required>
-                                <option value="">-- বই নির্বাচন করুন --</option>
-                                ${books.filter(b => b.available > 0).map(b => `<option value="${b.id}">${b.title} (${b.bookNumber}) — পাওয়া যাচ্ছে: ${b.available}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                            <div>
-                                <label class="form-label">ইস্যু তারিখ</label>
-                                <input class="form-input" type="date" id="issueDate" required>
-                            </div>
-                            <div>
-                                <label class="form-label">ডিউ তারিখ</label>
-                                <input class="form-input" type="date" id="dueDate" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-accent" style="width:100%;justify-content:center;">
-                            <i class="fas fa-check"></i> ইস্যু করুন
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="card">
-                <h3 style="font-size:16px;font-weight:800;color:var(--primary);margin-bottom:18px;">
-                    <i class="fas fa-rotate-left" style="color:var(--success);margin-right:6px;"></i> দ্রুত রিটার্ন
-                </h3>
-                <form onsubmit="return quickReturn(event)">
-                    <div style="display:grid;gap:14px;">
-                        <div>
-                            <label class="form-label">রিডার নির্বাচন করুন</label>
-                            <select class="form-input" id="returnReader" required onchange="updateReturnBookList()">
-                                <option value="">-- রিডার নির্বাচন করুন --</option>
-                                ${readers.map(r => `<option value="${r.id}">${r.name} (${r.className})</option>`).join('')}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="form-label">বই নির্বাচন করুন</label>
-                            <select class="form-input" id="returnBook" required>
-                                <option value="">-- আগে রিডার নির্বাচন করুন --</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="form-label">রিটার্ন তারিখ</label>
-                            <input class="form-input" type="date" id="returnDate" required>
-                        </div>
-                        <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">
-                            <i class="fas fa-check"></i> ফেরত নিন
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="card" style="padding:0;overflow:hidden;">
-            <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-                <h3 style="font-size:15px;font-weight:800;color:var(--primary);">
-                    <i class="fas fa-list" style="margin-right:6px;"></i> বর্তমানে ইস্যু আছে (${issuedList.length})
-                </h3>
-            </div>
-            <div class="table-wrap">
-                <table class="data-table">
-                    <thead><tr><th>রিডার</th><th>বই</th><th>ইস্যু তারিখ</th><th>ডিউ তারিখ</th><th>অ্যাকশন</th></tr></thead>
-                    <tbody>
-                        ${issuedList.length === 0 ? `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--muted);">কোনো ইস্যুকৃত বই নেই</td></tr>` :
-                        issuedList.map(t => {
-                            const reader = readers.find(r => r.id === t.readerId);
-                            const book = books.find(b => b.id === t.bookId);
-                            return `<tr>
-                                <td>
-                                    <div style="font-weight:600;">${reader ? reader.name : 'অজানা'}</div>
-                                    <div style="font-size:11px;color:var(--muted);">${reader ? reader.className : ''}</div>
-                                </td>
-                                <td>
-                                    <div style="font-weight:600;">${book ? book.title : 'অজানা'}</div>
-                                    <div style="font-size:11px;color:var(--muted);">${book ? book.bookNumber : ''}</div>
-                                </td>
-                                <td>${t.issueDate}</td>
-                                <td style="font-weight:600;color:var(--danger);">${t.dueDate}</td>
-                                <td>
-                                    <button class="btn-sm" style="background:rgba(64,145,108,0.12);color:var(--success);font-weight:600;" onclick="returnBook(${t.id})">
-                                        <i class="fas fa-rotate-left" style="margin-right:4px;"></i> ফেরত নিন
-                                    </button>
-                                </td>
-                            </tr>`;
-                        }).join('')}
-                    </tbody>
-                </table>
+                <button class="btn btn-primary btn-block" onclick="addReader()"><i class="fas fa-user-plus"></i> রিডার যোগ করুন</button>
             </div>
         </div>
     </div>
-    <style>
-        @media (max-width: 768px) {
-            .ir-grid { grid-template-columns: 1fr !important; }
-        }
-    </style>`;
-}
 
-function updateReturnBookList() {
-    const readerId = parseInt(document.getElementById('returnReader').value);
-    const sel = document.getElementById('returnBook');
-    const issued = transactions.filter(t => t.readerId === readerId && t.status === 'issued');
-    if (issued.length === 0) {
-        sel.innerHTML = '<option value="">-- এই রিডারের কোনো ইস্যুকৃত বই নেই --</option>';
-        return;
-    }
-    sel.innerHTML = '<option value="">-- বই নির্বাচন করুন --</option>' +
-        issued.map(t => {
-            const book = books.find(b => b.id === t.bookId);
-            return `<option value="${t.id}">${book ? book.title + ' (' + book.bookNumber + ')' : 'অজানা'} — ইস্যু: ${t.issueDate}</option>`;
-        }).join('');
-}
-
-function issueBook(e) {
-    e.preventDefault();
-    const readerId = parseInt(document.getElementById('issueReader').value);
-    const bookId = parseInt(document.getElementById('issueBook').value);
-    const issueDate = document.getElementById('issueDate').value;
-    const dueDate = document.getElementById('dueDate').value;
-
-    if (!issueDate || !dueDate) { showToast('তারিখ নির্বাচন করুন', 'error'); return false; }
-
-    const book = books.find(b => b.id === bookId);
-    if (!book || book.available <= 0) { showToast('এই বইটি এখন পাওয়া যাচ্ছে না', 'error'); return false; }
-
-    const bnIssueDate = toBanglaDate(new Date(issueDate));
-    const bnDueDate = toBanglaDate(new Date(dueDate));
-
-    transactions.push({
-        id: nextId(transactions), readerId, bookId,
-        issueDate: bnIssueDate, dueDate: bnDueDate, returnDate: null, status: 'issued'
-    });
-    book.available--;
-    saveData('lib_transactions', transactions);
-    saveData('lib_books', books);
-    showToast('বই ইস্যু করা হয়েছে');
-    renderPage();
-    return false;
-}
-
-function quickReturn(e) {
-    e.preventDefault();
-    const txId = parseInt(document.getElementById('returnBook').value);
-    const returnDate = document.getElementById('returnDate').value;
-    if (!txId) { showToast('বই নির্বাচন করুন', 'error'); return false; }
-    if (!returnDate) { showToast('রিটার্ন তারিখ দিন', 'error'); return false; }
-
-    returnBook(txId, returnDate);
-    return false;
-}
-
-function returnBook(txId, specificDate) {
-    const tx = transactions.find(t => t.id === txId);
-    if (!tx || tx.status !== 'issued') return;
-
-    const returnDate = specificDate ? toBanglaDate(new Date(specificDate)) : toBanglaDate(new Date());
-    tx.returnDate = returnDate;
-    tx.status = 'returned';
-
-    const book = books.find(b => b.id === tx.bookId);
-    if (book) book.available++;
-
-    saveData('lib_transactions', transactions);
-    saveData('lib_books', books);
-    showToast('বই সফলভাবে ফেরত নেওয়া হয়েছে');
-    renderPage();
-}
-
-// ==================== ইতিহাস পেজ ====================
-function renderHistory() {
-    const sorted = [...transactions].sort((a, b) => b.id - a.id);
-    return `
-    <div class="animate-in">
-        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:20px;">
-            <div class="search-bar" style="flex:1;min-width:200px;max-width:360px;">
-                <i class="fas fa-search"></i>
-                <input class="form-input" id="historySearch" placeholder="নাম বা বই দিয়ে খুঁজুন..." oninput="filterHistory()" style="padding-left:40px;">
+    <!-- ===== মোডাল: বই ইস্যু ===== -->
+    <div class="modal-overlay" id="modal-issue-book">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3><i class="fas fa-hand-holding" style="margin-right:6px;color:var(--accent)"></i>বই ইস্যু করুন</h3>
+                <button class="modal-close" onclick="closeModal('modal-issue-book')"><i class="fas fa-times"></i></button>
             </div>
-            <select class="form-input" id="historyFilter" onchange="filterHistory()" style="width:auto;min-width:140px;">
-                <option value="all">সব দেখুন</option>
-                <option value="issued">ইস্যু আছে</option>
-                <option value="returned">ফেরত দেওয়া হয়েছে</option>
-            </select>
+            <div class="modal-body">
+                <div style="background:var(--primary-lighter);padding:14px;border-radius:var(--radius-xs);margin-bottom:16px;border-left:4px solid var(--primary);">
+                    <div style="font-size:.7rem;color:var(--text-secondary);margin-bottom:2px;">বই</div>
+                    <div style="font-weight:800;font-size:.92rem;color:var(--primary-dark)" id="issue-book-name"></div>
+                    <div style="font-size:.75rem;color:var(--text-secondary)" id="issue-book-author"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">রিডার নির্বাচন *</label>
+                    <select class="form-select" id="issue-reader-select"><option value="">রিডার নির্বাচন করুন</option></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">ইস্যুর তারিখ</label>
+                    <input type="date" class="form-input" id="issue-date">
+                </div>
+                <button class="btn btn-accent btn-block" onclick="issueBook()"><i class="fas fa-hand-holding"></i> ইস্যু করুন</button>
+            </div>
         </div>
-        <div class="card table-wrap" style="padding:0;overflow:hidden;">
-            <table class="data-table" id="historyTable">
-                <thead>
-                    <tr>
-                        <th>নং</th>
-                        <th>রিডার</th>
-                        <th>ক্লাস</th>
-                        <th>বই</th>
-                        <th>ইস্যু তারিখ</th>
-                        <th>ডিউ তারিখ</th>
-                        <th>ফেরত তারিখ</th>
-                        <th>স্ট্যাটাস</th>
-                    </tr>
-                </thead>
-                <tbody id="historyBody"></tbody>
-            </table>
+    </div>
+
+    <!-- ===== মোডাল: বই ফেরত ===== -->
+    <div class="modal-overlay" id="modal-return-book">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3><i class="fas fa-undo" style="margin-right:6px;color:var(--success)"></i>বই ফেরত নিন</h3>
+                <button class="modal-close" onclick="closeModal('modal-return-book')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="return-book-details"></div>
+                <div class="form-group" style="margin-top:16px">
+                    <label class="form-label">ফেরতের তারিখ</label>
+                    <input type="date" class="form-input" id="return-date">
+                </div>
+                <button class="btn btn-success btn-block" onclick="returnBook()"><i class="fas fa-undo"></i> ফেরত নিন</button>
+            </div>
         </div>
-    </div>`;
-}
+    </div>
 
-function filterHistory() {
-    const q = (document.getElementById('historySearch')?.value || '').toLowerCase();
-    const f = document.getElementById('historyFilter')?.value || 'all';
-    const sorted = [...transactions].sort((a, b) => b.id - a.id);
-    const filtered = sorted.filter(t => {
-        const reader = readers.find(r => r.id === t.readerId);
-        const book = books.find(b => b.id === t.bookId);
-        const matchSearch = !q || (reader && reader.name.toLowerCase().includes(q)) || (book && book.title.toLowerCase().includes(q));
-        const matchFilter = f === 'all' || t.status === f;
-        return matchSearch && matchFilter;
-    });
-    renderHistoryTable(filtered);
-}
+    <!-- ===== মোডাল: কনফার্ম ===== -->
+    <div class="modal-overlay" id="modal-confirm">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-circle" style="margin-right:6px;color:var(--danger)"></i>নিশ্চিত করুন</h3>
+                <button class="modal-close" onclick="closeModal('modal-confirm')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body"><div class="confirm-content" id="confirm-content"></div></div>
+        </div>
+    </div>
 
-function renderHistoryTable(list) {
-    const tbody = document.getElementById('historyBody');
-    if (!tbody) return;
-    if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted);">কোনো তথ্য পাওয়া যায়নি</td></tr>`;
-        return;
-    }
-    tbody.innerHTML = list.map((t, i) => {
-        const reader = readers.find(r => r.id === t.readerId);
-        const book = books.find(b => b.id === t.bookId);
-        return `<tr>
-            <td style="font-weight:600;color:var(--muted);">${i + 1}</td>
-            <td style="font-weight:600;">${reader ? reader.name : 'অজানা'}</td>
-            <td style="font-size:12px;color:var(--muted);">${reader ? reader.className : ''}</td>
-            <td>${book ? book.title : 'অজানা'}</td>
-            <td>${t.issueDate}</td>
-            <td style="color:var(--danger);font-weight:600;">${t.dueDate}</td>
-            <td>${t.returnDate || '<span style="color:var(--muted);">—</span>'}</td>
-            <td><span class="badge ${t.status === 'returned' ? 'badge-green' : 'badge-orange'}">${t.status === 'returned' ? 'ফেরত' : 'ইস্যু'}</span></td>
-        </tr>`;
-    }).join('');
-}
+    <!-- ===== মোডাল: বই বিস্তারিত ===== -->
+    <div class="modal-overlay" id="modal-book-detail">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle" style="margin-right:6px;color:var(--primary)"></i>বইয়ের বিস্তারিত</h3>
+                <button class="modal-close" onclick="closeModal('modal-book-detail')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="book-detail-body"></div>
+        </div>
+    </div>
 
-// ==================== হেল্পার ফাংশন ====================
-function toBanglaDate(date) {
-    const digits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-    const y = String(date.getFullYear()).split('').map(d => digits[parseInt(d)]).join('');
-    const m = String(date.getMonth() + 1).padStart(2, '0').split('').map(d => digits[parseInt(d)]).join('');
-    const d = String(date.getDate()).padStart(2, '0').split('').map(d => digits[parseInt(d)]).join('');
-    return `${y}-${m}-${d}`;
-}
+    <!-- ===== টোস্ট ===== -->
+    <div id="toast-container"></div>
 
-function setDefaultDates() {
-    const today = new Date().toISOString().split('T')[0];
-    const due = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const issueDateEl = document.getElementById('issueDate');
-    const dueDateEl = document.getElementById('dueDate');
-    const returnDateEl = document.getElementById('returnDate');
-    if (issueDateEl) issueDateEl.value = today;
-    if (dueDateEl) dueDateEl.value = due;
-    if (returnDateEl) returnDateEl.value = today;
-}
+    <!-- ===== Firebase ===== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+        import { getDatabase, ref, set, get, remove, push, update, onValue } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
 
-// ==================== পেজ রেন্ডারের পর কলব্যাক ====================
-const observer = new MutationObserver(() => {
-    if (currentPage === 'books') { filterBooks(); }
-    if (currentPage === 'readers') { filterReaders(); }
-    if (currentPage === 'issueReturn') { setDefaultDates(); }
-    if (currentPage === 'history') { filterHistory(); }
-});
-observer.observe(document.getElementById('pageContent'), { childList: true });
+        // ==========================================================
+        // এখানে তোমার নিজের Firebase প্রজেক্টের config বসাও
+        // Firebase Console > Project Settings > General > Your apps > SDK setup
+        // ==========================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMFf3Z_wIgrTADCLHtsBPKK3Xy-axArbU",
+            authDomain: "book-documentation-7492a.firebaseapp.com",
+            databaseURL: "https://book-documentation-7492a-default-rtdb.firebaseio.com",
+            projectId: "book-documentation-7492a",
+            storageBucket: "book-documentation-7492a.firebasestorage.app",
+            messagingSenderId: "1014518839027",
+            appId: "1:1014518839027:web:c839e1cb70101f0601e986"
+        };
 
-// ==================== রিয়েলটাইম লোড ও লিসেনার (Firebase থেকে) ====================
-let _initialLoadDone = false;
-let _firstSnapCount = 0;
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-function _afterFirstLoad() {
-    _firstSnapCount++;
-    if (_firstSnapCount >= 3 && !_initialLoadDone) {
-        _initialLoadDone = true;
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) overlay.remove();
-        navigateTo('dashboard');
-    }
-}
+        // ===== গ্লোবাল স্টেট =====
+        let books = {};
+        let readers = {};
+        let issues = {};
+        let currentView = 'home';
+        let selectedBookId = null;
+        let selectedIssueId = null;
+        let selectedReaderPhoto = null;
+        let sampleDataLoaded = false;
+        let booksLoaded = false, readersLoaded = false, issuesLoaded = false;
 
-function _toArray(v) {
-    if (Array.isArray(v)) return v.filter(x => x != null);
-    if (v && typeof v === 'object') return Object.values(v).filter(x => x != null);
-    return [];
-}
+        const booksRef = ref(db, 'books');
+        const readersRef = ref(db, 'readers');
+        const issuesRef = ref(db, 'issues');
+        const connectedRef = ref(db, '.info/connected');
 
-function initApp() {
-    try {
-        db.ref('lib_books').on('value', (snap) => {
-            if (snap.exists()) {
-                books = _toArray(snap.val());
-            } else if (!_initialLoadDone) {
-                books = JSON.parse(JSON.stringify(defaultBooks));
-                saveData('lib_books', books);
+        // ===== কানেকশন স্ট্যাটাস =====
+        onValue(connectedRef, (snap) => {
+            const badge = document.getElementById('conn-badge');
+            const text = document.getElementById('conn-text');
+            if (snap.val() === true) {
+                badge.classList.remove('offline'); badge.classList.add('online');
+                text.textContent = 'সংযুক্ত';
+                setTimeout(() => { badge.style.opacity = '0'; }, 2000);
+            } else {
+                badge.classList.remove('online'); badge.classList.add('offline');
+                text.textContent = 'সংযোগ বিচ্ছিন্ন';
+                badge.style.opacity = '1';
             }
-            if (_initialLoadDone) renderPage();
-            else _afterFirstLoad();
-        }, (err) => {
-            console.error(err);
-            showToast('বই ডেটা সিঙ্ক ব্যর্থ হয়েছে', 'error');
         });
 
-        db.ref('lib_readers').on('value', (snap) => {
-            if (snap.exists()) {
-                readers = _toArray(snap.val());
-            } else if (!_initialLoadDone) {
-                readers = JSON.parse(JSON.stringify(defaultReaders));
-                saveData('lib_readers', readers);
-            }
-            if (_initialLoadDone) renderPage();
-            else _afterFirstLoad();
-        }, (err) => {
-            console.error(err);
-            showToast('রিডার ডেটা সিঙ্ক ব্যর্থ হয়েছে', 'error');
-        });
+        // ===== স্যাম্পল ডাটা =====
+        const sampleBooks = [
+            { title: "সহীহ বুখারী (১ম খণ্ড)", author: "ইমাম বুখারী (রহ.)", category: "হাদীস", totalCopies: 3 },
+            { title: "সহীহ বুখারী (২য় খণ্ড)", author: "ইমাম বুখারী (রহ.)", category: "হাদীস", totalCopies: 2 },
+            { title: "তিরমিযী শরীফ", author: "ইমাম তিরমিযী (রহ.)", category: "হাদীস", totalCopies: 2 },
+            { title: "রিয়াদুস সালেহীন", author: "ইমাম নাওয়াবী (রহ.)", category: "হাদীস", totalCopies: 4 },
+            { title: "ফিকহুস সুন্নাহ", author: "সাইয়্যিদ সাবেক", category: "ফিকহ", totalCopies: 3 },
+            { title: "আল-আদাবুল মুফরাদ", author: "ইমাম বুখারী (রহ.)", category: "আদব", totalCopies: 2 },
+            { title: "তাফসীর ইবনে কাসীর", author: "আল্লামা ইবনে কাসীর (রহ.)", category: "তাফসীর", totalCopies: 2 },
+            { title: "নবী জীবনী (রাহে বেলাগ)", author: "আয়াতুল্লাহ হামিদানী", category: "সীরাত", totalCopies: 3 },
+            { title: "দাওয়াতে দীন", author: "সৈয়দ আবুল আ'লা মাওদুদী", category: "দাওয়াত", totalCopies: 2 },
+            { title: "ইসলামের ইতিহাস", author: "মাওলানা আকবর খান", category: "ইতিহাস", totalCopies: 2 },
+            { title: "মাসনুন দুআ", author: "মাওলানা আশরাফ আলী থানভী", category: "দুআ", totalCopies: 5 },
+            { title: "বিশ্বাসের মূলনীতি", author: "সৈয়দ আবুল আ'লা মাওদুদী", category: "আকীদাহ", totalCopies: 3 },
+        ];
 
-        db.ref('lib_transactions').on('value', (snap) => {
-            if (snap.exists()) {
-                transactions = _toArray(snap.val());
-            } else if (!_initialLoadDone) {
-                transactions = JSON.parse(JSON.stringify(defaultTransactions));
-                saveData('lib_transactions', transactions);
+        const sampleReaders = [
+            { name: "মো. রাশেদুল ইসলাম", phone: "০১৭১২-৩৪৫৬৭৮", address: "৩০ নং ওয়ার্ড, পূর্ব ব্লক" },
+            { name: "আব্দুল্লাহ আল মামুন", phone: "০১৮১৫-৬৭৮৯০১", address: "৩০ নং ওয়ার্ড, মধ্য ব্লক" },
+            { name: "মো. ইব্রাহিম খলিল", phone: "০১৯২৩-৪৫৬৭৮৯", address: "৩০ নং ওয়ার্ড, পশ্চিম ব্লক" },
+            { name: "মো. তানভীর হাসান", phone: "০১৬৪৫-৭৮৯০১২", address: "৩০ নং ওয়ার্ড, দক্ষিণ ব্লক" },
+            { name: "মো. আরিফ হোসেন", phone: "০১৫১৮-২৩৪৫৬৭", address: "৩০ নং ওয়ার্ড, উত্তর ব্লক" },
+        ];
+
+        // ===== স্যাম্পল ডাটা লোড (শুধুমাত্র ডাটাবেজ খালি থাকলে) =====
+        async function loadSampleData() {
+            if (sampleDataLoaded) return;
+            try {
+                const snapshot = await get(booksRef);
+                if (snapshot.exists() && Object.keys(snapshot.val()).length > 0) {
+                    sampleDataLoaded = true;
+                    return;
+                }
+
+                const bookIds = [];
+                for (const book of sampleBooks) {
+                    const newRef = push(booksRef);
+                    await set(newRef, { ...book, createdAt: new Date().toISOString() });
+                    bookIds.push(newRef.key);
+                }
+
+                const readerIds = [];
+                for (const reader of sampleReaders) {
+                    const newRef = push(readersRef);
+                    await set(newRef, { ...reader, photo: null, createdAt: new Date().toISOString() });
+                    readerIds.push(newRef.key);
+                }
+
+                const sampleIssues = [
+                    { bookIdx: 0, readerIdx: 0, date: "2025-01-15" },
+                    { bookIdx: 3, readerIdx: 0, date: "2025-02-10" },
+                    { bookIdx: 7, readerIdx: 1, date: "2025-01-20" },
+                    { bookIdx: 4, readerIdx: 1, date: "2025-03-01", returned: "2025-03-25" },
+                    { bookIdx: 1, readerIdx: 2, date: "2025-02-05" },
+                    { bookIdx: 8, readerIdx: 2, date: "2025-01-10", returned: "2025-02-20" },
+                    { bookIdx: 10, readerIdx: 3, date: "2025-03-05" },
+                    { bookIdx: 9, readerIdx: 4, date: "2025-02-15" },
+                    { bookIdx: 11, readerIdx: 4, date: "2025-03-10" },
+                    { bookIdx: 5, readerIdx: 3, date: "2025-01-25", returned: "2025-03-01" },
+                ];
+
+                for (const si of sampleIssues) {
+                    const newRef = push(issuesRef);
+                    await set(newRef, {
+                        bookId: bookIds[si.bookIdx],
+                        readerId: readerIds[si.readerIdx],
+                        issueDate: si.date,
+                        returnDate: si.returned || null,
+                        createdAt: new Date().toISOString()
+                    });
+                }
+
+                sampleDataLoaded = true;
+                showToast('স্যাম্পল ডাটা লোড হয়েছে', 'success');
+                console.log('স্যাম্পল ডাটা লোড হয়েছে');
+            } catch (err) {
+                console.error('স্যাম্পল ডাটা লোড ত্রুটি:', err);
+                showToast('ডাটাবেজ সংযোগ ত্রুটি — Firebase Rules চেক করুন', 'error');
             }
-            if (_initialLoadDone) renderPage();
-            else _afterFirstLoad();
-        }, (err) => {
-            console.error(err);
-            showToast('লেনদেন ডেটা সিঙ্ক ব্যর্থ হয়েছে', 'error');
-        });
-    } catch (err) {
-        console.error(err);
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.innerHTML = `<div style="color:var(--danger);font-weight:700;text-align:center;padding:0 20px;">
-                <i class="fas fa-triangle-exclamation" style="font-size:28px;display:block;margin-bottom:10px;"></i>
-                ডেটাবেজ সংযোগ ব্যর্থ হয়েছে।<br>
-                <span style="font-size:12px;font-weight:500;color:var(--muted);">firebaseConfig ঠিক আছে কিনা, ইন্টারনেট কানেকশন এবং ডেটাবেজ রুলস চেক করো।</span>
+        }
+
+        loadSampleData();
+
+        // ===== রিয়েলটাইম লিসেনার =====
+        onValue(booksRef, (snapshot) => { books = snapshot.val() || {}; booksLoaded = true; updateAllViews(); });
+        onValue(readersRef, (snapshot) => { readers = snapshot.val() || {}; readersLoaded = true; updateAllViews(); });
+        onValue(issuesRef, (snapshot) => { issues = snapshot.val() || {}; issuesLoaded = true; updateAllViews(); });
+
+        // ===== হেল্পার =====
+        function getBookStats(bookId) {
+            const book = books[bookId];
+            if (!book) return { issued: 0, available: 0 };
+            const total = book.totalCopies || 1;
+            let issued = 0;
+            Object.values(issues).forEach(i => { if (i.bookId === bookId && !i.returnDate) issued++; });
+            return { issued, available: Math.max(0, total - issued) };
+        }
+
+        function getReaderStats(readerId) {
+            let current = 0, total = 0;
+            Object.values(issues).forEach(i => { if (i.readerId === readerId) { total++; if (!i.returnDate) current++; } });
+            return { current, total };
+        }
+
+        function getReaderCurrentBooks(readerId) {
+            const r = [];
+            Object.entries(issues).forEach(([id, i]) => {
+                if (i.readerId === readerId && !i.returnDate) r.push({ ...i, issueId: id, bookName: books[i.bookId]?.title || 'অজানা' });
+            });
+            return r;
+        }
+
+        function formatDate(d) {
+            if (!d) return '—';
+            return new Date(d).toLocaleDateString('bn-BD', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function toBn(n) {
+            return String(n).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+        }
+
+        function getInitial(name) {
+            if (!name) return '?';
+            return name.trim().split(' ').pop().charAt(0);
+        }
+
+        function escHtml(s) {
+            if (!s) return '';
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        // ===== ভিউ আপডেট =====
+        function updateAllViews() {
+            updateStats();
+            if (currentView === 'home') renderHomeBooks();
+            if (currentView === 'books') renderBooksList();
+            if (currentView === 'readers') renderReadersList();
+            if (currentView === 'reader-detail') renderReaderDetail();
+        }
+
+        function updateStats() {
+            let t = 0, i = 0, a = 0;
+            Object.keys(books).forEach(id => { const s = getBookStats(id); t += books[id].totalCopies || 1; i += s.issued; a += s.available; });
+            document.getElementById('stat-total').textContent = toBn(t);
+            document.getElementById('stat-issued').textContent = toBn(i);
+            document.getElementById('stat-available').textContent = toBn(a);
+        }
+
+        function renderHomeBooks() {
+            const c = document.getElementById('home-books-list');
+            if (!booksLoaded) { c.innerHTML = '<div class="spinner"></div>'; return; }
+            const ids = Object.keys(books);
+            if (!ids.length) { c.innerHTML = '<div class="empty-state"><i class="fas fa-book"></i><p>কোনো বই নেই। নতুন বই যোগ করুন।</p></div>'; return; }
+            c.innerHTML = ids.slice(-5).reverse().map(id => bookCardHTML(id)).join('');
+        }
+
+        function bookCardHTML(id) {
+            const b = books[id];
+            const s = getBookStats(id);
+            const sc = s.available > 0 ? 'status-available' : 'status-issued';
+            const st = s.available > 0 ? 'প্রাপ্য' : 'ইস্যুকৃত';
+            return `<div class="book-card" onclick="window.showBookDetail('${id}')">
+                <div class="book-card-header">
+                    <div class="book-icon"><i class="fas fa-book"></i></div>
+                    <div class="book-info">
+                        <div class="book-title">${escHtml(b.title)}</div>
+                        <div class="book-author">${escHtml(b.author || '')}</div>
+                    </div>
+                    <span class="book-status ${sc}">${st}</span>
+                </div>
+                <div class="book-meta">
+                    <span><i class="fas fa-layer-group"></i>${escHtml(b.category || 'শ্রেণীবিহীন')}</span>
+                    <span><i class="fas fa-copy"></i>মোট: ${toBn(b.totalCopies || 1)}</span>
+                    <span><i class="fas fa-check-circle"></i>প্রাপ্য: ${toBn(s.available)}</span>
+                </div>
             </div>`;
         }
-    }
-}
-initApp();
-</script>
+
+        function renderBooksList() {
+            const c = document.getElementById('books-list');
+            if (!booksLoaded) { c.innerHTML = '<div class="spinner"></div>'; return; }
+            const q = document.getElementById('book-search').value.toLowerCase().trim();
+            let ids = Object.keys(books);
+            if (q) ids = ids.filter(id => books[id].title?.toLowerCase().includes(q) || books[id].author?.toLowerCase().includes(q));
+            if (!ids.length) { c.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><p>কোনো বই পাওয়া যায়নি।</p></div>'; return; }
+            c.innerHTML = ids.reverse().map(id => bookCardHTML(id)).join('');
+        }
+
+        function renderReadersList() {
+            const c = document.getElementById('readers-list');
+            if (!readersLoaded) { c.innerHTML = '<div class="spinner"></div>'; return; }
+            const q = document.getElementById('reader-search').value.toLowerCase().trim();
+            let ids = Object.keys(readers);
+            if (q) ids = ids.filter(id => readers[id].name?.toLowerCase().includes(q) || readers[id].phone?.includes(q));
+            if (!ids.length) { c.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>কোনো রিডার পাওয়া যায়নি।</p></div>'; return; }
+            c.innerHTML = ids.reverse().map(id => {
+                const r = readers[id];
+                const s = getReaderStats(id);
+                const av = r.photo ? `<img src="${r.photo}" alt="${escHtml(r.name)}">` : getInitial(r.name);
+                return `<div class="reader-card" onclick="window.openReaderDetail('${id}')">
+                    <div class="reader-avatar">${av}</div>
+                    <div class="reader-info">
+                        <div class="reader-name">${escHtml(r.name)}</div>
+                        <div class="reader-stats">বর্তমান ইস্যু: ${toBn(s.current)} | মোট পড়েছে: ${toBn(s.total)}</div>
+                    </div>
+                    <div class="reader-actions" onclick="event.stopPropagation()">
+                        <button class="reader-action-btn delete" onclick="window.confirmDeleteReader('${id}')" title="মুছুন"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderReaderDetail() {
+            const c = document.getElementById('reader-detail-content');
+            const rid = window._currentReaderId;
+            if (!readersLoaded) { c.innerHTML = '<div class="spinner"></div>'; return; }
+            if (!rid || !readers[rid]) { c.innerHTML = '<div class="empty-state"><i class="fas fa-user-slash"></i><p>রিডার পাওয়া যায়নি।</p></div>'; return; }
+            const r = readers[rid];
+            const s = getReaderStats(rid);
+            const cb = getReaderCurrentBooks(rid);
+            const av = r.photo ? `<img src="${r.photo}" alt="${escHtml(r.name)}">` : getInitial(r.name);
+
+            c.innerHTML = `
+                <div class="reader-profile-header">
+                    <div class="reader-profile-avatar">${av}</div>
+                    <div class="reader-profile-name">${escHtml(r.name)}</div>
+                    <div class="reader-profile-phone"><i class="fas fa-phone" style="margin-right:4px;font-size:.7rem"></i>${escHtml(r.phone || '—')}</div>
+                    ${r.address ? `<div style="font-size:.75rem;color:var(--text-secondary);margin-top:4px"><i class="fas fa-map-marker-alt" style="margin-right:4px;font-size:.7rem"></i>${escHtml(r.address)}</div>` : ''}
+                    <div class="reader-stat-row">
+                        <div class="reader-stat-item"><div class="reader-stat-num">${toBn(s.current)}</div><div class="reader-stat-lbl">বর্তমান ইস্যু</div></div>
+                        <div class="reader-stat-item"><div class="reader-stat-num">${toBn(s.total)}</div><div class="reader-stat-lbl">মোট পড়েছে</div></div>
+                    </div>
+                </div>
+                <div class="section-title" style="font-size:.95rem"><i class="fas fa-book-reader"></i> বর্তমানে ইস্যুকৃত বই</div>
+                ${!cb.length ? '<div class="empty-state" style="padding:20px"><i class="fas fa-inbox"></i><p>কোনো বই ইস্যু নেই।</p></div>'
+                : cb.map(ib => `<div class="issued-book-item">
+                    <div class="issued-book-info">
+                        <div class="issued-book-title">${escHtml(ib.bookName)}</div>
+                        <div class="issued-book-date">ইস্যু: ${formatDate(ib.issueDate)}</div>
+                    </div>
+                    <button class="btn btn-warning btn-sm" onclick="window.openReturnModal('${ib.issueId}')"><i class="fas fa-undo"></i> ফেরত</button>
+                </div>`).join('')}
+                <div style="margin-top:20px">
+                    <button class="btn btn-danger btn-block btn-sm" onclick="window.confirmDeleteReader('${rid}')"><i class="fas fa-trash"></i> রিডার মুছে ফেলুন</button>
+                </div>`;
+        }
+
+        // ===== নেভিগেশন =====
+        window.navigateTo = function(v) {
+            currentView = v;
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            const t = document.getElementById('view-' + v);
+            if (t) t.classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+            document.getElementById('fab-btn').classList.toggle('visible', v === 'books' || v === 'readers');
+            if (v === 'home') renderHomeBooks();
+            if (v === 'books') renderBooksList();
+            if (v === 'readers') renderReadersList();
+            window.scrollTo(0, 0);
+        };
+
+        window.handleFabClick = function() {
+            if (currentView === 'books') openModal('modal-add-book');
+            else if (currentView === 'readers') { resetReaderForm(); openModal('modal-add-reader'); }
+        };
+
+        // ===== মোডাল =====
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        window.closeModal = closeModal;
+        document.querySelectorAll('.modal-overlay').forEach(o => { o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }); });
+
+        // ===== বই যোগ =====
+        window.addBook = async function() {
+            const title = document.getElementById('new-book-title').value.trim();
+            const author = document.getElementById('new-book-author').value.trim();
+            const category = document.getElementById('new-book-category').value.trim();
+            const totalCopies = parseInt(document.getElementById('new-book-total').value) || 1;
+            if (!title) { showToast('বইয়ের নাম লিখুন', 'error'); return; }
+            if (!author) { showToast('লেখকের নাম লিখুন', 'error'); return; }
+            try {
+                await set(push(booksRef), { title, author, category, totalCopies, createdAt: new Date().toISOString() });
+                closeModal('modal-add-book');
+                document.getElementById('new-book-title').value = '';
+                document.getElementById('new-book-author').value = '';
+                document.getElementById('new-book-category').value = '';
+                document.getElementById('new-book-total').value = '1';
+                showToast('বই সফলভাবে যোগ হয়েছে', 'success');
+            } catch (err) { showToast('সমস্যা: ' + err.message, 'error'); }
+        };
+
+        // ===== বই বিস্তারিত =====
+        window.showBookDetail = function(bookId) {
+            const b = books[bookId];
+            if (!b) return;
+            const s = getBookStats(bookId);
+            const st = s.available > 0 ? 'প্রাপ্য' : 'সব ইস্যুকৃত';
+            const sc = s.available > 0 ? 'var(--success)' : 'var(--accent)';
+            const sbg = s.available > 0 ? '#ECFDF5' : 'var(--accent-light)';
+            const hist = [];
+            Object.entries(issues).forEach(([id, i]) => {
+                if (i.bookId === bookId) hist.push({ ...i, issueId: id, readerName: readers[i.readerId]?.name || 'অজানা', isReturned: !!i.returnDate });
+            });
+            let h = `<div class="book-detail-hero">
+                <div class="book-detail-icon"><i class="fas fa-book"></i></div>
+                <div style="font-size:1.1rem;font-weight:900;color:var(--primary-dark)">${escHtml(b.title)}</div>
+                <div style="font-size:.85rem;color:var(--text-secondary);margin-top:2px">${escHtml(b.author)}</div>
+                <div style="margin-top:8px;display:inline-flex;align-items:center;gap:4px;padding:4px 14px;border-radius:20px;font-size:.75rem;font-weight:700;background:${sbg};color:${sc}">
+                    <i class="fas fa-circle" style="font-size:.4rem"></i> ${st}
+                </div>
+            </div>
+            <div class="issue-detail-row"><span class="issue-detail-label">বিভাগ</span><span class="issue-detail-value">${escHtml(b.category || 'শ্রেণীবিহীন')}</span></div>
+            <div class="issue-detail-row"><span class="issue-detail-label">মোট কপি</span><span class="issue-detail-value">${toBn(b.totalCopies || 1)}</span></div>
+            <div class="issue-detail-row"><span class="issue-detail-label">ইস্যুকৃত</span><span class="issue-detail-value" style="color:var(--accent)">${toBn(s.issued)}</span></div>
+            <div class="issue-detail-row"><span class="issue-detail-label">প্রাপ্য</span><span class="issue-detail-value" style="color:var(--success);font-weight:800">${toBn(s.available)}</span></div>
+            <div style="display:flex;gap:8px;margin-top:20px">`;
+            if (s.available > 0) h += `<button class="btn btn-accent" style="flex:1" onclick="window.openIssueModal('${bookId}')"><i class="fas fa-hand-holding"></i> ইস্যু করুন</button>`;
+            h += `<button class="btn btn-danger btn-sm" onclick="window.confirmDeleteBook('${bookId}')"><i class="fas fa-trash"></i></button></div>`;
+            if (hist.length) {
+                h += `<div class="section-title" style="font-size:.9rem;margin-top:24px"><i class="fas fa-history"></i> ইস্যু ইতিহাস</div>`;
+                hist.reverse().forEach(ih => {
+                    h += `<div class="issued-book-item">
+                        <div class="issued-book-info">
+                            <div class="issued-book-title">${escHtml(ih.readerName)}</div>
+                            <div class="issued-book-date">ইস্যু: ${formatDate(ih.issueDate)}${ih.isReturned ? ' | ফেরত: ' + formatDate(ih.returnDate) : ''}</div>
+                        </div>
+                        <span style="font-size:.63rem;font-weight:700;padding:3px 8px;border-radius:20px;${ih.isReturned ? 'background:#ECFDF5;color:#059669' : 'background:var(--accent-light);color:var(--accent)'}">${ih.isReturned ? 'ফেরত' : 'বর্তমান'}</span>
+                    </div>`;
+                });
+            }
+            document.getElementById('book-detail-body').innerHTML = h;
+            openModal('modal-book-detail');
+        };
+
+        // ===== ইস্যু মোডাল =====
+        window.openIssueModal = function(bookId) {
+            selectedBookId = bookId;
+            const b = books[bookId];
+            document.getElementById('issue-book-name').textContent = b.title;
+            document.getElementById('issue-book-author').textContent = b.author;
+            document.getElementById('issue-date').value = new Date().toISOString().split('T')[0];
+            const sel = document.getElementById('issue-reader-select');
+            sel.innerHTML = '<option value="">রিডার নির্বাচন করুন</option>';
+            Object.entries(readers).forEach(([id, r]) => {
+                const s = getReaderStats(id);
+                sel.innerHTML += `<option value="${id}">${escHtml(r.name)} (${escHtml(r.phone || '')}) — বর্তমান: ${toBn(s.current)}</option>`;
+            });
+            closeModal('modal-book-detail');
+            openModal('modal-issue-book');
+        };
+
+        window.issueBook = async function() {
+            const rid = document.getElementById('issue-reader-select').value;
+            const d = document.getElementById('issue-date').value;
+            if (!rid) { showToast('রিডার নির্বাচন করুন', 'error'); return; }
+            if (!d) { showToast('তারিখ নির্বাচন করুন', 'error'); return; }
+            const s = getBookStats(selectedBookId);
+            if (s.available <= 0) { showToast('আর কপি নেই', 'error'); return; }
+            try {
+                await set(push(issuesRef), { bookId: selectedBookId, readerId: rid, issueDate: d, returnDate: null, createdAt: new Date().toISOString() });
+                closeModal('modal-issue-book');
+                showToast('বই সফলভাবে ইস্যু হয়েছে', 'success');
+            } catch (err) { showToast('সমস্যা: ' + err.message, 'error'); }
+        };
+
+        // ===== ফেরত মোডাল =====
+        window.openReturnModal = function(issueId) {
+            selectedIssueId = issueId;
+            const i = issues[issueId];
+            if (!i) return;
+            document.getElementById('return-book-details').innerHTML = `
+                <div class="issue-detail-row"><span class="issue-detail-label">বই</span><span class="issue-detail-value">${escHtml(books[i.bookId]?.title || 'অজানা')}</span></div>
+                <div class="issue-detail-row"><span class="issue-detail-label">রিডার</span><span class="issue-detail-value">${escHtml(readers[i.readerId]?.name || 'অজানা')}</span></div>
+                <div class="issue-detail-row"><span class="issue-detail-label">ইস্যু তারিখ</span><span class="issue-detail-value">${formatDate(i.issueDate)}</span></div>`;
+            document.getElementById('return-date').value = new Date().toISOString().split('T')[0];
+            openModal('modal-return-book');
+        };
+
+        window.returnBook = async function() {
+            const d = document.getElementById('return-date').value;
+            if (!d) { showToast('ফেরতের তারিখ দিন', 'error'); return; }
+            try {
+                await update(ref(db, 'issues/' + selectedIssueId), { returnDate: d });
+                closeModal('modal-return-book');
+                showToast('বই সফলভাবে ফেরত নেওয়া হয়েছে', 'success');
+            } catch (err) { showToast('সমস্যা: ' + err.message, 'error'); }
+        };
+
+        // ===== ছবি আপলোড =====
+        window.handlePhotoSelect = function(e) {
+            const f = e.target.files[0];
+            if (!f) return;
+            if (f.size > 200 * 1024) { showToast('ছবি ২০০KB এর কম হতে হবে', 'warning'); return; }
+            const rd = new FileReader();
+            rd.onload = function(ev) {
+                selectedReaderPhoto = ev.target.result;
+                const up = document.getElementById('reader-photo-upload');
+                const old = up.querySelector('img');
+                if (old) old.remove();
+                const img = document.createElement('img');
+                img.src = selectedReaderPhoto;
+                up.appendChild(img);
+                up.classList.add('has-photo');
+            };
+            rd.readAsDataURL(f);
+        };
+
+        function resetReaderForm() {
+            selectedReaderPhoto = null;
+            document.getElementById('new-reader-name').value = '';
+            document.getElementById('new-reader-phone').value = '';
+            document.getElementById('new-reader-address').value = '';
+            document.getElementById('reader-photo-input').value = '';
+            const up = document.getElementById('reader-photo-upload');
+            const img = up.querySelector('img');
+            if (img) img.remove();
+            up.classList.remove('has-photo');
+        }
+
+        // ===== রিডার যোগ =====
+        window.addReader = async function() {
+            const name = document.getElementById('new-reader-name').value.trim();
+            const phone = document.getElementById('new-reader-phone').value.trim();
+            const address = document.getElementById('new-reader-address').value.trim();
+            if (!name) { showToast('রিডারের নাম লিখুন', 'error'); return; }
+            if (!phone) { showToast('ফোন নম্বর লিখুন', 'error'); return; }
+            try {
+                await set(push(readersRef), { name, phone, address, photo: selectedReaderPhoto || null, createdAt: new Date().toISOString() });
+                closeModal('modal-add-reader');
+                resetReaderForm();
+                showToast('রিডার সফলভাবে যোগ হয়েছে', 'success');
+            } catch (err) { showToast('সমস্যা: ' + err.message, 'error'); }
+        };
+
+        // ===== রিডার ডিটেইল =====
+        window.openReaderDetail = function(id) { window._currentReaderId = id; navigateTo('reader-detail'); };
+
+        // ===== ডিলিট কনফার্ম =====
+        window.confirmDeleteReader = function(id) {
+            const r = readers[id];
+            if (!r) return;
+            const s = getReaderStats(id);
+            let w = '';
+            if (s.current > 0) w = `<div style="margin-top:10px;padding:8px 12px;background:#FEF3C7;border-radius:8px;font-size:.78rem;color:#92400E"><i class="fas fa-exclamation-triangle" style="margin-right:4px"></i> ${toBn(s.current)}টি বই এখনও ইস্যু আছে!</div>`;
+            document.getElementById('confirm-content').innerHTML = `<i class="fas fa-user-times"></i><p>আপনি কি <span class="confirm-name">${escHtml(r.name)}</span>-কে মুছে ফেলতে চান?${w}</p><div class="confirm-actions"><button class="btn btn-outline" onclick="closeModal('modal-confirm')">না</button><button class="btn btn-danger" onclick="window.deleteReader('${id}')">হ্যাঁ, মুছুন</button></div>`;
+            openModal('modal-confirm');
+        };
+
+        window.deleteReader = async function(id) {
+            try {
+                const ri = Object.entries(issues).filter(([, i]) => i.readerId === id);
+                for (const [iid] of ri) await remove(ref(db, 'issues/' + iid));
+                await remove(ref(db, 'readers/' + id));
+                closeModal('modal-confirm');
+                showToast('রিডার মুছে ফেলা হয়েছে', 'success');
+                if (currentView === 'reader-detail') navigateTo('readers');
+            } catch (err) { showToast('সমস্যা: ' + err.message, 'error'); }
+        };
+
+        window.confirmDeleteBook = function(id) {
+            const b = books[id];
+            if (!b) return;
+            const s = getBookStats(id);
+            let w = '';
+            if (s.issued > 0) w = `<div style="margin-top:10px;padding:8px 12px;background:#FEF3C7;border-radius:8px;font-size:.78rem;color:#92400E"><i class="fas fa-exclamation-triangle" style="margin-right:4px"></i> ${toBn(s.issued)}টি কপি এখনও ইস্যু আছে!</div>`;
+            document.getElementById('confirm-content').innerHTML = `<i class="fas fa-book" style="color:var(--danger)"></i><p>আপনি কি <span class="confirm-name">${escHtml(b.title)}</span> মুছে ফেলতে চান?${w}</p><div class="confirm-actions"><button class="btn btn-outline" onclick="closeModal('modal-confirm')">না</button><button class="btn btn-danger" onclick="window.deleteBook('${id}')">হ্যাঁ, মুছুন</button></div>`;
+            openModal('modal-confirm');
+        };
+
+        window.deleteBook = async function(id) {
+            try {
+                const bi = Object.entries(issues).filter(([, i]) => i.bookId === id);
+                for (const [iid] of bi) await remove(ref(db, 'issues/' + iid));
+                await remove(ref(db, 'books/' + id));
+                closeModal('modal-confirm');
+                closeModal('modal-book-detail');
+                showToast('বই মুছে ফেলা হয়েছে', 'success');
+            } catch (err) { showToast('সমস্যা: ' + err.message, 'error'); }
+        };
+
+        // ===== সার্চ =====
+        document.getElementById('book-search').addEventListener('input', renderBooksList);
+        document.getElementById('reader-search').addEventListener('input', renderReadersList);
+
+        // ===== টোস্ট =====
+        function showToast(msg, type = 'success') {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'toast toast-' + type;
+            const icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle' };
+            t.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${msg}`;
+            c.appendChild(t);
+            setTimeout(() => { if (t.parentNode) t.remove(); }, 3200);
+        }
+        window.showToast = showToast;
+
+        console.log('৩০ নং পূর্ব ওয়ার্ড লাইব্রেরী চালু হচ্ছে...');
+    </script>
 </body>
 </html>

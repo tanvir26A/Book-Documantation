@@ -69,6 +69,7 @@
             width:42px;height:42px;flex-shrink:0;
             border-radius:50%;object-fit:cover;
             border:2px solid rgba(255,255,255,0.3);
+            background:rgba(255,255,255,0.15);
         }
         .app-header .header-text h1{
             font-size:0.92rem;font-weight:800;
@@ -81,6 +82,16 @@
             height:3px;
             background:var(--gradient-accent);
         }
+        .conn-badge{
+            position:fixed;top:8px;right:8px;z-index:600;
+            font-size:.6rem;font-weight:700;padding:3px 8px;border-radius:20px;
+            display:flex;align-items:center;gap:4px;
+            background:rgba(255,255,255,.15);color:#fff;
+            backdrop-filter:blur(4px);
+        }
+        .conn-badge i{font-size:.4rem}
+        .conn-badge.online i{color:#34D399}
+        .conn-badge.offline i{color:#FBBF24}
 
         .view{display:none;padding:18px 16px 100px;animation:viewIn .25s ease}
         .view.active{display:block}
@@ -156,13 +167,13 @@
         .book-status{
             display:inline-flex;align-items:center;gap:4px;
             padding:3px 10px;border-radius:20px;font-size:0.63rem;font-weight:700;flex-shrink:0;
+            white-space:nowrap;
         }
         .status-available{background:#ECFDF5;color:#059669}
         .status-issued{background:var(--accent-light);color:var(--accent)}
         .book-meta{
             display:flex;gap:14px;padding-top:10px;border-top:1px solid var(--border);
-            font-size:0.7rem;color:var(--text-muted);padding-left:6px;
-            flex-wrap:wrap;
+            font-size:0.7rem;color:var(--text-muted);padding-left:6px;flex-wrap:wrap;
         }
         .book-meta span i{margin-right:3px;color:var(--primary);opacity:.5}
 
@@ -236,6 +247,7 @@
             background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235A6577' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
             background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
         }
+        .form-hint{font-size:.68rem;color:var(--text-muted);margin-top:4px}
 
         .modal-overlay{
             position:fixed;inset:0;background:rgba(6,42,77,.5);z-index:500;
@@ -254,13 +266,14 @@
         .modal-header{
             display:flex;align-items:center;justify-content:space-between;
             padding:16px 20px 12px;border-bottom:1px solid var(--border);
+            position:sticky;top:0;background:var(--card);z-index:2;
         }
         .modal-header h3{font-size:1rem;font-weight:800;color:var(--primary-dark)}
         .modal-close{
             width:32px;height:32px;border-radius:50%;border:none;
             background:var(--bg);color:var(--text-secondary);display:flex;
             align-items:center;justify-content:center;cursor:pointer;
-            font-size:.85rem;transition:background .2s;
+            font-size:.85rem;transition:background .2s;flex-shrink:0;
         }
         .modal-close:hover{background:var(--border)}
         .modal-body{padding:20px}
@@ -290,6 +303,10 @@
         }
         .photo-upload.has-photo .change-overlay{display:flex}
         .photo-upload.has-photo i,.photo-upload.has-photo span{display:none}
+        .photo-remove-btn{
+            display:block;margin:-12px auto 20px;font-size:.68rem;color:var(--danger);
+            background:none;border:none;cursor:pointer;font-weight:700;
+        }
 
         #toast-container{
             position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:1000;
@@ -343,11 +360,11 @@
 
         .issue-detail-row{
             display:flex;justify-content:space-between;padding:10px 0;
-            border-bottom:1px solid var(--border);font-size:.82rem;
+            border-bottom:1px solid var(--border);font-size:.82rem;gap:10px;
         }
         .issue-detail-row:last-child{border-bottom:none}
-        .issue-detail-label{color:var(--text-secondary)}
-        .issue-detail-value{font-weight:700;text-align:right;max-width:60%}
+        .issue-detail-label{color:var(--text-secondary);flex-shrink:0}
+        .issue-detail-value{font-weight:700;text-align:right;max-width:65%;word-break:break-word}
 
         .fab{
             position:fixed;bottom:80px;right:calc(50% - 195px);
@@ -401,19 +418,19 @@
         .quick-action-btn .qa-text{font-size:.78rem;font-weight:700;color:var(--text)}
         .quick-action-btn .qa-sub{font-size:.65rem;color:var(--text-muted);font-weight:400}
 
-        .conn-badge{
-            position:fixed;top:70px;right:12px;z-index:999;
-            font-size:.62rem;font-weight:700;padding:4px 10px;border-radius:20px;
-            display:flex;align-items:center;gap:5px;box-shadow:var(--shadow-sm);
-            transition:opacity .3s;
+        .setup-banner{
+            background:#FEF3C7;border:1px solid #FCD34D;color:#92400E;
+            padding:12px 14px;border-radius:var(--radius-xs);font-size:.72rem;
+            margin-bottom:16px;line-height:1.6;display:none;
         }
-        .conn-badge.online{background:#ECFDF5;color:#059669}
-        .conn-badge.offline{background:#FEF2F2;color:#DC2626}
-        .conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+        .setup-banner.show{display:block}
+        .setup-banner b{display:block;margin-bottom:4px;font-size:.78rem}
     </style>
 </head>
 <body>
     <div id="app">
+        <div class="conn-badge offline" id="conn-badge"><i class="fas fa-circle"></i><span id="conn-text">সংযোগ পরীক্ষা হচ্ছে</span></div>
+
         <!-- ===== হেডার ===== -->
         <header class="app-header">
             <img class="logo-img" src="https://z-cdn-media.chatglm.cn/files/beacad35-425e-483e-9118-f90d3ed5764a.png?auth_key=1885902870-568b4c10c7b9453b88bc5e7037838521-0-c42ba1bdf6a47fac0f683357d4fa370f" alt="লোগো" onerror="this.style.display='none'">
@@ -423,10 +440,13 @@
             </div>
         </header>
         <div class="header-accent-line"></div>
-        <div class="conn-badge offline" id="conn-badge"><span class="conn-dot"></span><span id="conn-text">সংযোগ হচ্ছে...</span></div>
 
         <!-- ===== হোম ভিউ ===== -->
         <div id="view-home" class="view active">
+            <div class="setup-banner" id="setup-banner">
+                <b><i class="fas fa-triangle-exclamation"></i> ডাটাবেজ সংযোগ সমস্যা</b>
+                Firebase Realtime Database এর সাথে সংযোগ হচ্ছে না। নিচের কারণ হতে পারে: (১) Firebase Console-এ Realtime Database Rules-এ read/write অনুমতি নেই, (২) ইন্টারনেট সংযোগ নেই। Firebase Console → Realtime Database → Rules-এ গিয়ে rules { ".read": true, ".write": true } সেট করুন (টেস্টের জন্য)।
+            </div>
             <div class="stat-grid">
                 <div class="stat-card">
                     <div class="stat-number" id="stat-total">০</div>
@@ -525,7 +545,7 @@
                     <label class="form-label">মোট কপি সংখ্যা *</label>
                     <input type="number" class="form-input" id="new-book-total" placeholder="কপি সংখ্যা" min="1" value="1">
                 </div>
-                <button class="btn btn-primary btn-block" onclick="addBook()"><i class="fas fa-plus"></i> বই যোগ করুন</button>
+                <button class="btn btn-primary btn-block" id="btn-add-book" onclick="addBook()"><i class="fas fa-plus"></i> বই যোগ করুন</button>
             </div>
         </div>
     </div>
@@ -544,6 +564,7 @@
                     <div class="change-overlay">পরিবর্তন</div>
                 </div>
                 <input type="file" id="reader-photo-input" accept="image/*" style="display:none" onchange="handlePhotoSelect(event)">
+                <button class="photo-remove-btn" id="photo-remove-btn" style="display:none" onclick="removePhoto()"><i class="fas fa-trash"></i> ছবি সরান</button>
                 <div class="form-group">
                     <label class="form-label">নাম *</label>
                     <input type="text" class="form-input" id="new-reader-name" placeholder="রিডারের নাম লিখুন">
@@ -556,7 +577,7 @@
                     <label class="form-label">ঠিকানা</label>
                     <textarea class="form-textarea" id="new-reader-address" placeholder="ঠিকানা লিখুন"></textarea>
                 </div>
-                <button class="btn btn-primary btn-block" onclick="addReader()"><i class="fas fa-user-plus"></i> রিডার যোগ করুন</button>
+                <button class="btn btn-primary btn-block" id="btn-add-reader" onclick="addReader()"><i class="fas fa-user-plus"></i> রিডার যোগ করুন</button>
             </div>
         </div>
     </div>
@@ -583,7 +604,7 @@
                     <label class="form-label">ইস্যুর তারিখ</label>
                     <input type="date" class="form-input" id="issue-date">
                 </div>
-                <button class="btn btn-accent btn-block" onclick="issueBook()"><i class="fas fa-hand-holding"></i> ইস্যু করুন</button>
+                <button class="btn btn-accent btn-block" id="btn-issue-book" onclick="issueBook()"><i class="fas fa-hand-holding"></i> ইস্যু করুন</button>
             </div>
         </div>
     </div>
@@ -602,7 +623,7 @@
                     <label class="form-label">ফেরতের তারিখ</label>
                     <input type="date" class="form-input" id="return-date">
                 </div>
-                <button class="btn btn-success btn-block" onclick="returnBook()"><i class="fas fa-undo"></i> ফেরত নিন</button>
+                <button class="btn btn-success btn-block" id="btn-return-book" onclick="returnBook()"><i class="fas fa-undo"></i> ফেরত নিন</button>
             </div>
         </div>
     </div>
@@ -637,12 +658,18 @@
     <!-- ===== Firebase ===== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-        import { getDatabase, ref, set, get, remove, push, update, onValue } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+        import {
+            getDatabase, ref, set, get, remove, push, update, onValue, serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
 
-        // ==========================================================
-        // এখানে তোমার নিজের Firebase প্রজেক্টের config বসাও
-        // Firebase Console > Project Settings > General > Your apps > SDK setup
-        // ==========================================================
+        // ================================================================
+        // আপনার Firebase প্রজেক্টের কনফিগ (আপনার নিজের প্রজেক্ট থেকে নেওয়া)
+        // GitHub Pages-এ হোস্ট করার আগে Firebase Console -> Project settings
+        // -> General -> Your apps থেকে আপনার নিজের config বসাতে পারেন।
+        // Realtime Database -> Rules ট্যাবে গিয়ে অন্তত টেস্টের জন্য:
+        //   { "rules": { ".read": true, ".write": true } }
+        // সেট করে "Publish" করে নিন, নাহলে read/write পারমিশন এরর আসবে।
+        // ================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyBMFf3Z_wIgrTADCLHtsBPKK3Xy-axArbU",
             authDomain: "book-documentation-7492a.firebaseapp.com",
@@ -653,8 +680,14 @@
             appId: "1:1014518839027:web:c839e1cb70101f0601e986"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        let app, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+        } catch (e) {
+            console.error('Firebase init error:', e);
+            showToast('Firebase চালু করতে সমস্যা হয়েছে', 'error');
+        }
 
         // ===== গ্লোবাল স্টেট =====
         let books = {};
@@ -665,7 +698,7 @@
         let selectedIssueId = null;
         let selectedReaderPhoto = null;
         let sampleDataLoaded = false;
-        let booksLoaded = false, readersLoaded = false, issuesLoaded = false;
+        let hasConnected = false;
 
         const booksRef = ref(db, 'books');
         const readersRef = ref(db, 'readers');
@@ -676,15 +709,23 @@
         onValue(connectedRef, (snap) => {
             const badge = document.getElementById('conn-badge');
             const text = document.getElementById('conn-text');
+            const banner = document.getElementById('setup-banner');
             if (snap.val() === true) {
+                hasConnected = true;
                 badge.classList.remove('offline'); badge.classList.add('online');
                 text.textContent = 'সংযুক্ত';
-                setTimeout(() => { badge.style.opacity = '0'; }, 2000);
+                banner.classList.remove('show');
             } else {
                 badge.classList.remove('online'); badge.classList.add('offline');
                 text.textContent = 'সংযোগ বিচ্ছিন্ন';
-                badge.style.opacity = '1';
+                // কিছুক্ষণ চেষ্টার পরও কানেক্ট না হলে ব্যানার দেখাই
+                if (!hasConnected) {
+                    setTimeout(() => { if (!hasConnected) banner.classList.add('show'); }, 6000);
+                }
             }
+        }, (err) => {
+            console.error('Connection check error:', err);
+            document.getElementById('setup-banner').classList.add('show');
         });
 
         // ===== স্যাম্পল ডাটা =====
@@ -711,12 +752,12 @@
             { name: "মো. আরিফ হোসেন", phone: "০১৫১৮-২৩৪৫৬৭", address: "৩০ নং ওয়ার্ড, উত্তর ব্লক" },
         ];
 
-        // ===== স্যাম্পল ডাটা লোড (শুধুমাত্র ডাটাবেজ খালি থাকলে) =====
+        // ===== স্যাম্পল ডাটা লোড (শুধু ডাটাবেজ খালি থাকলে) =====
         async function loadSampleData() {
             if (sampleDataLoaded) return;
             try {
                 const snapshot = await get(booksRef);
-                if (snapshot.exists() && Object.keys(snapshot.val()).length > 0) {
+                if (snapshot.exists() && Object.keys(snapshot.val() || {}).length > 0) {
                     sampleDataLoaded = true;
                     return;
                 }
@@ -760,20 +801,23 @@
                 }
 
                 sampleDataLoaded = true;
-                showToast('স্যাম্পল ডাটা লোড হয়েছে', 'success');
+                showToast('নমুনা ডাটা লোড হয়েছে — এখন থেকে শুরু করুন', 'success');
                 console.log('স্যাম্পল ডাটা লোড হয়েছে');
             } catch (err) {
                 console.error('স্যাম্পল ডাটা লোড ত্রুটি:', err);
-                showToast('ডাটাবেজ সংযোগ ত্রুটি — Firebase Rules চেক করুন', 'error');
+                document.getElementById('setup-banner').classList.add('show');
             }
         }
 
         loadSampleData();
 
         // ===== রিয়েলটাইম লিসেনার =====
-        onValue(booksRef, (snapshot) => { books = snapshot.val() || {}; booksLoaded = true; updateAllViews(); });
-        onValue(readersRef, (snapshot) => { readers = snapshot.val() || {}; readersLoaded = true; updateAllViews(); });
-        onValue(issuesRef, (snapshot) => { issues = snapshot.val() || {}; issuesLoaded = true; updateAllViews(); });
+        onValue(booksRef, (snapshot) => { books = snapshot.val() || {}; hasConnected = true; updateAllViews(); },
+            (err) => { console.error(err); document.getElementById('setup-banner').classList.add('show'); });
+        onValue(readersRef, (snapshot) => { readers = snapshot.val() || {}; updateAllViews(); },
+            (err) => console.error(err));
+        onValue(issuesRef, (snapshot) => { issues = snapshot.val() || {}; updateAllViews(); },
+            (err) => console.error(err));
 
         // ===== হেল্পার =====
         function getBookStats(bookId) {
@@ -801,7 +845,9 @@
 
         function formatDate(d) {
             if (!d) return '—';
-            return new Date(d).toLocaleDateString('bn-BD', { year: 'numeric', month: 'short', day: 'numeric' });
+            try {
+                return new Date(d).toLocaleDateString('bn-BD', { year: 'numeric', month: 'short', day: 'numeric' });
+            } catch { return d; }
         }
 
         function toBn(n) {
@@ -810,13 +856,14 @@
 
         function getInitial(name) {
             if (!name) return '?';
-            return name.trim().split(' ').pop().charAt(0);
+            const parts = name.trim().split(' ').filter(Boolean);
+            return parts.length ? parts[parts.length - 1].charAt(0) : '?';
         }
 
         function escHtml(s) {
-            if (!s) return '';
+            if (s === null || s === undefined) return '';
             const d = document.createElement('div');
-            d.textContent = s;
+            d.textContent = String(s);
             return d.innerHTML;
         }
 
@@ -839,7 +886,6 @@
 
         function renderHomeBooks() {
             const c = document.getElementById('home-books-list');
-            if (!booksLoaded) { c.innerHTML = '<div class="spinner"></div>'; return; }
             const ids = Object.keys(books);
             if (!ids.length) { c.innerHTML = '<div class="empty-state"><i class="fas fa-book"></i><p>কোনো বই নেই। নতুন বই যোগ করুন।</p></div>'; return; }
             c.innerHTML = ids.slice(-5).reverse().map(id => bookCardHTML(id)).join('');
@@ -847,6 +893,7 @@
 
         function bookCardHTML(id) {
             const b = books[id];
+            if (!b) return '';
             const s = getBookStats(id);
             const sc = s.available > 0 ? 'status-available' : 'status-issued';
             const st = s.available > 0 ? 'প্রাপ্য' : 'ইস্যুকৃত';
@@ -869,20 +916,18 @@
 
         function renderBooksList() {
             const c = document.getElementById('books-list');
-            if (!booksLoaded) { c.innerHTML = '<div class="spinner"></div>'; return; }
-            const q = document.getElementById('book-search').value.toLowerCase().trim();
+            const q = (document.getElementById('book-search').value || '').toLowerCase().trim();
             let ids = Object.keys(books);
-            if (q) ids = ids.filter(id => books[id].title?.toLowerCase().includes(q) || books[id].author?.toLowerCase().includes(q));
+            if (q) ids = ids.filter(id => (books[id].title || '').toLowerCase().includes(q) || (books[id].author || '').toLowerCase().includes(q));
             if (!ids.length) { c.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><p>কোনো বই পাওয়া যায়নি।</p></div>'; return; }
             c.innerHTML = ids.reverse().map(id => bookCardHTML(id)).join('');
         }
 
         function renderReadersList() {
             const c = document.getElementById('readers-list');
-            if (!readersLoaded) { c.innerHTML = '<div class="spinner"></div>'; return; }
-            const q = document.getElementById('reader-search').value.toLowerCase().trim();
+            const q = (document.getElementById('reader-search').value || '').toLowerCase().trim();
             let ids = Object.keys(readers);
-            if (q) ids = ids.filter(id => readers[id].name?.toLowerCase().includes(q) || readers[id].phone?.includes(q));
+            if (q) ids = ids.filter(id => (readers[id].name || '').toLowerCase().includes(q) || (readers[id].phone || '').includes(q));
             if (!ids.length) { c.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>কোনো রিডার পাওয়া যায়নি।</p></div>'; return; }
             c.innerHTML = ids.reverse().map(id => {
                 const r = readers[id];
@@ -904,8 +949,13 @@
         function renderReaderDetail() {
             const c = document.getElementById('reader-detail-content');
             const rid = window._currentReaderId;
-            if (!readersLoaded) { c.innerHTML = '<div class="spinner"></div>'; return; }
-            if (!rid || !readers[rid]) { c.innerHTML = '<div class="empty-state"><i class="fas fa-user-slash"></i><p>রিডার পাওয়া যায়নি।</p></div>'; return; }
+            if (!rid) { c.innerHTML = '<div class="empty-state"><i class="fas fa-user-slash"></i><p>রিডার পাওয়া যায়নি।</p></div>'; return; }
+            if (!readers[rid]) {
+                // ডাটা এখনো Firebase থেকে না আসলে লোডিং দেখাই, খালি না দেখিয়ে
+                if (!hasConnected) { c.innerHTML = '<div class="spinner"></div>'; return; }
+                c.innerHTML = '<div class="empty-state"><i class="fas fa-user-slash"></i><p>রিডার পাওয়া যায়নি। হয়তো মুছে ফেলা হয়েছে।</p></div>';
+                return;
+            }
             const r = readers[rid];
             const s = getReaderStats(rid);
             const cb = getReaderCurrentBooks(rid);
@@ -947,7 +997,7 @@
             if (v === 'home') renderHomeBooks();
             if (v === 'books') renderBooksList();
             if (v === 'readers') renderReadersList();
-            window.scrollTo(0, 0);
+            if (v === 'reader-detail') renderReaderDetail();
         };
 
         window.handleFabClick = function() {
@@ -963,34 +1013,46 @@
 
         // ===== বই যোগ =====
         window.addBook = async function() {
-            const title = document.getElementById('new-book-title').value.trim();
-            const author = document.getElementById('new-book-author').value.trim();
-            const category = document.getElementById('new-book-category').value.trim();
-            const totalCopies = parseInt(document.getElementById('new-book-total').value) || 1;
-            if (!title) { showToast('বইয়ের নাম লিখুন', 'error'); return; }
-            if (!author) { showToast('লেখকের নাম লিখুন', 'error'); return; }
+            const titleEl = document.getElementById('new-book-title');
+            const authorEl = document.getElementById('new-book-author');
+            const categoryEl = document.getElementById('new-book-category');
+            const totalEl = document.getElementById('new-book-total');
+            const btn = document.getElementById('btn-add-book');
+
+            const title = titleEl.value.trim();
+            const author = authorEl.value.trim();
+            const category = categoryEl.value.trim();
+            const totalCopies = parseInt(totalEl.value) || 1;
+
+            if (!title) { showToast('বইয়ের নাম লিখুন', 'error'); titleEl.focus(); return; }
+            if (!author) { showToast('লেখকের নাম লিখুন', 'error'); authorEl.focus(); return; }
+            if (totalCopies < 1) { showToast('কমপক্ষে ১টি কপি হতে হবে', 'error'); return; }
+
+            btn.disabled = true;
             try {
                 await set(push(booksRef), { title, author, category, totalCopies, createdAt: new Date().toISOString() });
                 closeModal('modal-add-book');
-                document.getElementById('new-book-title').value = '';
-                document.getElementById('new-book-author').value = '';
-                document.getElementById('new-book-category').value = '';
-                document.getElementById('new-book-total').value = '1';
+                titleEl.value = ''; authorEl.value = ''; categoryEl.value = ''; totalEl.value = '1';
                 showToast('বই সফলভাবে যোগ হয়েছে', 'success');
-            } catch (err) { showToast('সমস্যা: ' + err.message, 'error'); }
+            } catch (err) {
+                console.error(err);
+                showToast('সমস্যা: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
         };
 
         // ===== বই বিস্তারিত =====
         window.showBookDetail = function(bookId) {
             const b = books[bookId];
-            if (!b) return;
+            if (!b) { showToast('বইটি আর পাওয়া যাচ্ছে না', 'error'); return; }
             const s = getBookStats(bookId);
             const st = s.available > 0 ? 'প্রাপ্য' : 'সব ইস্যুকৃত';
             const sc = s.available > 0 ? 'var(--success)' : 'var(--accent)';
             const sbg = s.available > 0 ? '#ECFDF5' : 'var(--accent-light)';
             const hist = [];
             Object.entries(issues).forEach(([id, i]) => {
-                if (i.bookId === bookId) hist.push({ ...i, issueId: id, readerName: readers[i.readerId]?.name || 'অজানা', isReturned: !!i.returnDate });
+                if (i.bookId === bookId) hist.push({ ...i, issueId: id, readerName: readers[i.readerId]?.name || 'অজানা (মুছে ফেলা হয়েছে)', isReturned: !!i.returnDate });
             });
             let h = `<div class="book-detail-hero">
                 <div class="book-detail-icon"><i class="fas fa-book"></i></div>
@@ -1015,7 +1077,7 @@
                             <div class="issued-book-title">${escHtml(ih.readerName)}</div>
                             <div class="issued-book-date">ইস্যু: ${formatDate(ih.issueDate)}${ih.isReturned ? ' | ফেরত: ' + formatDate(ih.returnDate) : ''}</div>
                         </div>
-                        <span style="font-size:.63rem;font-weight:700;padding:3px 8px;border-radius:20px;${ih.isReturned ? 'background:#ECFDF5;color:#059669' : 'background:var(--accent-light);color:var(--accent)'}">${ih.isReturned ? 'ফেরত' : 'বর্তমান'}</span>
+                        <span style="font-size:.63rem;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0;${ih.isReturned ? 'background:#ECFDF5;color:#059669' : 'background:var(--accent-light);color:var(--accent)'}">${ih.isReturned ? 'ফেরত' : 'বর্তমান'}</span>
                     </div>`;
                 });
             }
@@ -1025,6 +1087,10 @@
 
         // ===== ইস্যু মোডাল =====
         window.openIssueModal = function(bookId) {
+            if (!readers || Object.keys(readers).length === 0) {
+                showToast('আগে অন্তত একজন রিডার যোগ করুন', 'warning');
+                return;
+            }
             selectedBookId = bookId;
             const b = books[bookId];
             document.getElementById('issue-book-name').textContent = b.title;
@@ -1043,22 +1109,29 @@
         window.issueBook = async function() {
             const rid = document.getElementById('issue-reader-select').value;
             const d = document.getElementById('issue-date').value;
+            const btn = document.getElementById('btn-issue-book');
             if (!rid) { showToast('রিডার নির্বাচন করুন', 'error'); return; }
             if (!d) { showToast('তারিখ নির্বাচন করুন', 'error'); return; }
             const s = getBookStats(selectedBookId);
             if (s.available <= 0) { showToast('আর কপি নেই', 'error'); return; }
+            btn.disabled = true;
             try {
                 await set(push(issuesRef), { bookId: selectedBookId, readerId: rid, issueDate: d, returnDate: null, createdAt: new Date().toISOString() });
                 closeModal('modal-issue-book');
                 showToast('বই সফলভাবে ইস্যু হয়েছে', 'success');
-            } catch (err) { showToast('সমস্যা: ' + err.message, 'error'); }
+            } catch (err) {
+                console.error(err);
+                showToast('সমস্যা: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
         };
 
         // ===== ফেরত মোডাল =====
         window.openReturnModal = function(issueId) {
             selectedIssueId = issueId;
             const i = issues[issueId];
-            if (!i) return;
+            if (!i) { showToast('ইস্যু রেকর্ড পাওয়া যায়নি', 'error'); return; }
             document.getElementById('return-book-details').innerHTML = `
                 <div class="issue-detail-row"><span class="issue-detail-label">বই</span><span class="issue-detail-value">${escHtml(books[i.bookId]?.title || 'অজানা')}</span></div>
                 <div class="issue-detail-row"><span class="issue-detail-label">রিডার</span><span class="issue-detail-value">${escHtml(readers[i.readerId]?.name || 'অজানা')}</span></div>
@@ -1069,19 +1142,27 @@
 
         window.returnBook = async function() {
             const d = document.getElementById('return-date').value;
+            const btn = document.getElementById('btn-return-book');
             if (!d) { showToast('ফেরতের তারিখ দিন', 'error'); return; }
+            btn.disabled = true;
             try {
                 await update(ref(db, 'issues/' + selectedIssueId), { returnDate: d });
                 closeModal('modal-return-book');
                 showToast('বই সফলভাবে ফেরত নেওয়া হয়েছে', 'success');
-            } catch (err) { showToast('সমস্যা: ' + err.message, 'error'); }
+            } catch (err) {
+                console.error(err);
+                showToast('সমস্যা: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
         };
 
         // ===== ছবি আপলোড =====
         window.handlePhotoSelect = function(e) {
             const f = e.target.files[0];
             if (!f) return;
-            if (f.size > 200 * 1024) { showToast('ছবি ২০০KB এর কম হতে হবে', 'warning'); return; }
+            if (!f.type.startsWith('image/')) { showToast('শুধুমাত্র ছবি ফাইল দিন', 'error'); return; }
+            if (f.size > 300 * 1024) { showToast('ছবি ৩০০KB এর কম হতে হবে', 'warning'); return; }
             const rd = new FileReader();
             rd.onload = function(ev) {
                 selectedReaderPhoto = ev.target.result;
@@ -1092,8 +1173,20 @@
                 img.src = selectedReaderPhoto;
                 up.appendChild(img);
                 up.classList.add('has-photo');
+                document.getElementById('photo-remove-btn').style.display = 'block';
             };
+            rd.onerror = function() { showToast('ছবি পড়তে সমস্যা হয়েছে', 'error'); };
             rd.readAsDataURL(f);
+        };
+
+        window.removePhoto = function() {
+            selectedReaderPhoto = null;
+            const up = document.getElementById('reader-photo-upload');
+            const img = up.querySelector('img');
+            if (img) img.remove();
+            up.classList.remove('has-photo');
+            document.getElementById('photo-remove-btn').style.display = 'none';
+            document.getElementById('reader-photo-input').value = '';
         };
 
         function resetReaderForm() {
@@ -1106,21 +1199,35 @@
             const img = up.querySelector('img');
             if (img) img.remove();
             up.classList.remove('has-photo');
+            document.getElementById('photo-remove-btn').style.display = 'none';
         }
 
         // ===== রিডার যোগ =====
         window.addReader = async function() {
-            const name = document.getElementById('new-reader-name').value.trim();
-            const phone = document.getElementById('new-reader-phone').value.trim();
-            const address = document.getElementById('new-reader-address').value.trim();
-            if (!name) { showToast('রিডারের নাম লিখুন', 'error'); return; }
-            if (!phone) { showToast('ফোন নম্বর লিখুন', 'error'); return; }
+            const nameEl = document.getElementById('new-reader-name');
+            const phoneEl = document.getElementById('new-reader-phone');
+            const addressEl = document.getElementById('new-reader-address');
+            const btn = document.getElementById('btn-add-reader');
+
+            const name = nameEl.value.trim();
+            const phone = phoneEl.value.trim();
+            const address = addressEl.value.trim();
+
+            if (!name) { showToast('রিডারের নাম লিখুন', 'error'); nameEl.focus(); return; }
+            if (!phone) { showToast('ফোন নম্বর লিখুন', 'error'); phoneEl.focus(); return; }
+
+            btn.disabled = true;
             try {
                 await set(push(readersRef), { name, phone, address, photo: selectedReaderPhoto || null, createdAt: new Date().toISOString() });
                 closeModal('modal-add-reader');
                 resetReaderForm();
                 showToast('রিডার সফলভাবে যোগ হয়েছে', 'success');
-            } catch (err) { showToast('সমস্যা: ' + err.message, 'error'); }
+            } catch (err) {
+                console.error(err);
+                showToast('সমস্যা: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
         };
 
         // ===== রিডার ডিটেইল =====
@@ -1129,7 +1236,7 @@
         // ===== ডিলিট কনফার্ম =====
         window.confirmDeleteReader = function(id) {
             const r = readers[id];
-            if (!r) return;
+            if (!r) { showToast('রিডার পাওয়া যায়নি', 'error'); return; }
             const s = getReaderStats(id);
             let w = '';
             if (s.current > 0) w = `<div style="margin-top:10px;padding:8px 12px;background:#FEF3C7;border-radius:8px;font-size:.78rem;color:#92400E"><i class="fas fa-exclamation-triangle" style="margin-right:4px"></i> ${toBn(s.current)}টি বই এখনও ইস্যু আছে!</div>`;
@@ -1145,12 +1252,15 @@
                 closeModal('modal-confirm');
                 showToast('রিডার মুছে ফেলা হয়েছে', 'success');
                 if (currentView === 'reader-detail') navigateTo('readers');
-            } catch (err) { showToast('সমস্যা: ' + err.message, 'error'); }
+            } catch (err) {
+                console.error(err);
+                showToast('সমস্যা: ' + err.message, 'error');
+            }
         };
 
         window.confirmDeleteBook = function(id) {
             const b = books[id];
-            if (!b) return;
+            if (!b) { showToast('বই পাওয়া যায়নি', 'error'); return; }
             const s = getBookStats(id);
             let w = '';
             if (s.issued > 0) w = `<div style="margin-top:10px;padding:8px 12px;background:#FEF3C7;border-radius:8px;font-size:.78rem;color:#92400E"><i class="fas fa-exclamation-triangle" style="margin-right:4px"></i> ${toBn(s.issued)}টি কপি এখনও ইস্যু আছে!</div>`;
@@ -1166,7 +1276,10 @@
                 closeModal('modal-confirm');
                 closeModal('modal-book-detail');
                 showToast('বই মুছে ফেলা হয়েছে', 'success');
-            } catch (err) { showToast('সমস্যা: ' + err.message, 'error'); }
+            } catch (err) {
+                console.error(err);
+                showToast('সমস্যা: ' + err.message, 'error');
+            }
         };
 
         // ===== সার্চ =====
@@ -1179,7 +1292,7 @@
             const t = document.createElement('div');
             t.className = 'toast toast-' + type;
             const icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle' };
-            t.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${msg}`;
+            t.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${escHtml(msg)}`;
             c.appendChild(t);
             setTimeout(() => { if (t.parentNode) t.remove(); }, 3200);
         }

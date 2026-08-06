@@ -61,8 +61,8 @@
         .app-header{
             position:sticky;top:0;z-index:100;
             background:var(--gradient-primary);
-            color:#fff;padding:0 18px;height:64px;
-            display:flex;align-items:center;gap:12px;
+            color:#fff;padding:0 14px;height:64px;
+            display:flex;align-items:center;gap:10px;
             box-shadow:0 4px 24px rgba(10,61,107,0.3);
         }
         .app-header .logo-img{
@@ -71,13 +71,21 @@
             border:2px solid rgba(255,255,255,0.3);
             background:rgba(255,255,255,0.15);
         }
+        .app-header .header-text{flex:1;min-width:0}
         .app-header .header-text h1{
-            font-size:0.92rem;font-weight:800;
+            font-size:0.88rem;font-weight:800;
             line-height:1.3;letter-spacing:-0.01em;
         }
         .app-header .header-text p{
-            font-size:0.65rem;opacity:0.7;font-weight:400;
+            font-size:0.63rem;opacity:0.7;font-weight:400;
         }
+        .report-btn{
+            flex-shrink:0;width:38px;height:38px;border-radius:10px;
+            background:rgba(255,255,255,.15);border:none;color:#fff;
+            display:flex;align-items:center;justify-content:center;
+            cursor:pointer;font-size:1rem;transition:background .2s;
+        }
+        .report-btn:active{background:rgba(255,255,255,.3)}
         .header-accent-line{
             height:3px;
             background:var(--gradient-accent);
@@ -163,7 +171,7 @@
         }
         .book-info{flex:1;min-width:0}
         .book-title{font-size:0.9rem;font-weight:700;line-height:1.35;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .book-author{font-size:0.73rem;color:var(--text-secondary)}
+        .book-author{font-size:0.73rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .book-status{
             display:inline-flex;align-items:center;gap:4px;
             padding:3px 10px;border-radius:20px;font-size:0.63rem;font-weight:700;flex-shrink:0;
@@ -193,7 +201,13 @@
         }
         .reader-avatar img{width:100%;height:100%;object-fit:cover}
         .reader-info{flex:1;min-width:0}
-        .reader-name{font-size:0.88rem;font-weight:700;margin-bottom:2px}
+        .reader-name{font-size:0.88rem;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:6px}
+        .reader-name.stale{color:var(--danger)}
+        .reader-type-tag{
+            font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:20px;
+            background:var(--primary-lighter);color:var(--primary);flex-shrink:0;
+        }
+        .reader-type-tag.karmi{background:var(--accent-light);color:var(--accent)}
         .reader-stats{font-size:0.68rem;color:var(--text-secondary)}
         .reader-actions{display:flex;gap:6px}
         .reader-action-btn{
@@ -213,6 +227,14 @@
         .search-box input:focus{border-color:var(--primary)}
         .search-box input::placeholder{color:var(--text-muted)}
         .search-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:.9rem}
+
+        .filter-chips{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+        .filter-chip{
+            padding:6px 14px;border-radius:20px;font-size:.72rem;font-weight:700;
+            border:1.5px solid var(--border);background:var(--card);color:var(--text-secondary);
+            cursor:pointer;transition:all .2s;
+        }
+        .filter-chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
 
         .btn{
             display:inline-flex;align-items:center;justify-content:center;gap:6px;
@@ -248,6 +270,17 @@
             background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
         }
         .form-hint{font-size:.68rem;color:var(--text-muted);margin-top:4px}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+        .type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+        .type-toggle-btn{
+            padding:12px;border-radius:var(--radius-xs);border:2px solid var(--border);
+            background:var(--card);cursor:pointer;text-align:center;transition:all .2s;
+        }
+        .type-toggle-btn i{display:block;font-size:1.1rem;margin-bottom:4px;color:var(--text-muted)}
+        .type-toggle-btn span{font-size:.78rem;font-weight:700;color:var(--text-secondary)}
+        .type-toggle-btn.active{border-color:var(--primary);background:var(--primary-lighter)}
+        .type-toggle-btn.active i,.type-toggle-btn.active span{color:var(--primary)}
 
         .modal-overlay{
             position:fixed;inset:0;background:rgba(6,42,77,.5);z-index:500;
@@ -324,7 +357,7 @@
         @keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
         @keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(-10px)}}
 
-        .reader-profile-header{text-align:center;margin-bottom:24px}
+        .reader-profile-header{text-align:center;margin-bottom:20px}
         .reader-profile-avatar{
             width:92px;height:92px;border-radius:50%;margin:0 auto 12px;overflow:hidden;
             border:3px solid var(--primary-lighter);background:var(--primary-lighter);
@@ -332,12 +365,12 @@
             color:var(--primary);font-size:2rem;font-weight:800;
         }
         .reader-profile-avatar img{width:100%;height:100%;object-fit:cover}
-        .reader-profile-name{font-size:1.15rem;font-weight:900;color:var(--primary-dark)}
+        .reader-profile-name{font-size:1.15rem;font-weight:900;color:var(--primary-dark);display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
         .reader-profile-phone{font-size:.8rem;color:var(--text-secondary)}
-        .reader-stat-row{display:flex;justify-content:center;gap:28px;margin-top:14px}
+        .reader-stat-row{display:flex;justify-content:center;gap:24px;margin-top:14px;flex-wrap:wrap}
         .reader-stat-item{text-align:center}
         .reader-stat-num{font-size:1.4rem;font-weight:900;color:var(--primary)}
-        .reader-stat-lbl{font-size:.65rem;color:var(--text-secondary);font-weight:500}
+        .reader-stat-lbl{font-size:.63rem;color:var(--text-secondary);font-weight:500}
         .issued-book-item{
             background:var(--card);border:1px solid var(--border);
             border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;
@@ -398,7 +431,7 @@
         @media(max-width:360px){
             .stat-grid{gap:6px}
             .stat-number{font-size:1.3rem}
-            .app-header .header-text h1{font-size:.82rem}
+            .app-header .header-text h1{font-size:.78rem}
         }
 
         .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
@@ -425,6 +458,49 @@
         }
         .setup-banner.show{display:block}
         .setup-banner b{display:block;margin-bottom:4px;font-size:.78rem}
+
+        .last-seen-row{
+            display:flex;align-items:center;justify-content:center;gap:8px;
+            margin-top:8px;font-size:.73rem;color:var(--text-secondary);
+        }
+        .last-seen-row.stale{color:var(--danger);font-weight:700}
+        .last-seen-row button{
+            font-size:.68rem;font-weight:700;color:var(--primary);
+            background:var(--primary-lighter);border:none;padding:4px 10px;
+            border-radius:20px;cursor:pointer;
+        }
+
+        .prayer-box{
+            background:var(--primary-lighter);border-radius:var(--radius-sm);
+            padding:14px;margin-bottom:16px;
+        }
+        .prayer-box-title{font-size:.78rem;font-weight:700;color:var(--primary-dark);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+        .prayer-input-row{display:flex;align-items:center;gap:10px}
+        .prayer-input-row input{flex:1}
+        .prayer-input-row .prayer-max{font-size:.68rem;color:var(--text-secondary);white-space:nowrap}
+
+        .report-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+        .report-stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center}
+        .report-stat .rs-num{font-size:1.4rem;font-weight:900;color:var(--primary)}
+        .report-stat .rs-lbl{font-size:.65rem;color:var(--text-secondary);margin-top:2px}
+        .report-list-item{
+            display:flex;align-items:center;justify-content:space-between;gap:10px;
+            padding:11px 12px;background:var(--card);border:1px solid var(--border);
+            border-radius:var(--radius-xs);margin-bottom:8px;
+        }
+        .report-rank{
+            width:26px;height:26px;border-radius:50%;background:var(--primary-lighter);
+            color:var(--primary);font-size:.72rem;font-weight:800;display:flex;
+            align-items:center;justify-content:center;flex-shrink:0;
+        }
+        .report-list-item .rli-name{font-size:.82rem;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .report-list-item .rli-count{font-size:.78rem;font-weight:800;color:var(--primary);flex-shrink:0}
+        .month-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px}
+        .month-nav button{border:none;background:var(--primary-lighter);color:var(--primary);width:32px;height:32px;border-radius:50%;font-size:.85rem;cursor:pointer}
+        .month-nav .mn-label{font-weight:800;font-size:.9rem;color:var(--primary-dark)}
+        .report-tabs{display:flex;gap:8px;margin-bottom:16px}
+        .report-tab{flex:1;padding:9px;text-align:center;border-radius:var(--radius-xs);border:1.5px solid var(--border);background:var(--card);font-size:.75rem;font-weight:700;color:var(--text-secondary);cursor:pointer}
+        .report-tab.active{background:var(--primary);border-color:var(--primary);color:#fff}
     </style>
 </head>
 <body>
@@ -438,6 +514,7 @@
                 <h1>৩০ নং পূর্ব ওয়ার্ড লাইব্রেরী</h1>
                 <p>বই ডকুমেন্টেশন সিস্টেম</p>
             </div>
+            <button class="report-btn" onclick="window.openReportModal()" title="মাসিক রিপোর্ট"><i class="fas fa-chart-column"></i></button>
         </header>
         <div class="header-accent-line"></div>
 
@@ -445,7 +522,7 @@
         <div id="view-home" class="view active">
             <div class="setup-banner" id="setup-banner">
                 <b><i class="fas fa-triangle-exclamation"></i> ডাটাবেজ সংযোগ সমস্যা</b>
-                Firebase Realtime Database এর সাথে সংযোগ হচ্ছে না। নিচের কারণ হতে পারে: (১) Firebase Console-এ Realtime Database Rules-এ read/write অনুমতি নেই, (২) ইন্টারনেট সংযোগ নেই। Firebase Console → Realtime Database → Rules-এ গিয়ে rules { ".read": true, ".write": true } সেট করুন (টেস্টের জন্য)।
+                Firebase Realtime Database এর সাথে সংযোগ হচ্ছে না। Firebase Console → Realtime Database → Rules-এ গিয়ে rules { ".read": true, ".write": true } সেট করুন (টেস্টের জন্য)।
             </div>
             <div class="stat-grid">
                 <div class="stat-card">
@@ -492,6 +569,12 @@
                 <i class="fas fa-search"></i>
                 <input type="text" id="reader-search" placeholder="রিডার খুঁজুন (নাম বা ফোন)...">
             </div>
+            <div class="filter-chips" id="reader-filter-chips">
+                <div class="filter-chip active" data-type="all" onclick="window.setReaderFilter('all')">সবাই</div>
+                <div class="filter-chip" data-type="sathi" onclick="window.setReaderFilter('sathi')">সাথী</div>
+                <div class="filter-chip" data-type="kormi" onclick="window.setReaderFilter('kormi')">কর্মী</div>
+                <div class="filter-chip" data-type="shomorthok" onclick="window.setReaderFilter('shomorthok')">সমর্থক</div>
+            </div>
             <div id="readers-list"><div class="spinner"></div></div>
         </div>
 
@@ -520,15 +603,16 @@
         <button class="fab" id="fab-btn" onclick="handleFabClick()"><i class="fas fa-plus"></i></button>
     </div>
 
-    <!-- ===== মোডাল: নতুন বই ===== -->
+    <!-- ===== মোডাল: নতুন/এডিট বই ===== -->
     <div class="modal-overlay" id="modal-add-book">
         <div class="modal-sheet">
             <div class="modal-handle"></div>
             <div class="modal-header">
-                <h3><i class="fas fa-book-medical" style="margin-right:6px;color:var(--accent)"></i>নতুন বই যোগ করুন</h3>
+                <h3 id="book-modal-title"><i class="fas fa-book-medical" style="margin-right:6px;color:var(--accent)"></i>নতুন বই যোগ করুন</h3>
                 <button class="modal-close" onclick="closeModal('modal-add-book')"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="edit-book-id" value="">
                 <div class="form-group">
                     <label class="form-label">বইয়ের নাম *</label>
                     <input type="text" class="form-input" id="new-book-title" placeholder="বইয়ের নাম লিখুন">
@@ -544,27 +628,45 @@
                 <div class="form-group">
                     <label class="form-label">মোট কপি সংখ্যা *</label>
                     <input type="number" class="form-input" id="new-book-total" placeholder="কপি সংখ্যা" min="1" value="1">
+                    <div class="form-hint" id="book-copy-hint"></div>
                 </div>
-                <button class="btn btn-primary btn-block" id="btn-add-book" onclick="addBook()"><i class="fas fa-plus"></i> বই যোগ করুন</button>
+                <button class="btn btn-primary btn-block" id="btn-add-book" onclick="saveBook()"><i class="fas fa-plus"></i> বই যোগ করুন</button>
             </div>
         </div>
     </div>
 
-    <!-- ===== মোডাল: নতুন রিডার ===== -->
+    <!-- ===== মোডাল: নতুন/এডিট রিডার ===== -->
     <div class="modal-overlay" id="modal-add-reader">
         <div class="modal-sheet">
             <div class="modal-handle"></div>
             <div class="modal-header">
-                <h3><i class="fas fa-user-plus" style="margin-right:6px;color:var(--accent)"></i>নতুন রিডার যোগ করুন</h3>
+                <h3 id="reader-modal-title"><i class="fas fa-user-plus" style="margin-right:6px;color:var(--accent)"></i>নতুন রিডার যোগ করুন</h3>
                 <button class="modal-close" onclick="closeModal('modal-add-reader')"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="edit-reader-id" value="">
                 <div class="photo-upload" id="reader-photo-upload" onclick="document.getElementById('reader-photo-input').click()">
                     <i class="fas fa-camera"></i><span>ছবি</span>
                     <div class="change-overlay">পরিবর্তন</div>
                 </div>
                 <input type="file" id="reader-photo-input" accept="image/*" style="display:none" onchange="handlePhotoSelect(event)">
                 <button class="photo-remove-btn" id="photo-remove-btn" style="display:none" onclick="removePhoto()"><i class="fas fa-trash"></i> ছবি সরান</button>
+
+                <div class="form-group">
+                    <label class="form-label">রিডার ধরন *</label>
+                    <div class="type-toggle" id="reader-type-toggle">
+                        <div class="type-toggle-btn" data-type="sathi" onclick="window.selectReaderType('sathi')">
+                            <i class="fas fa-handshake"></i><span>সাথী</span>
+                        </div>
+                        <div class="type-toggle-btn" data-type="kormi" onclick="window.selectReaderType('kormi')">
+                            <i class="fas fa-briefcase"></i><span>কর্মী</span>
+                        </div>
+                        <div class="type-toggle-btn" data-type="shomorthok" onclick="window.selectReaderType('shomorthok')">
+                            <i class="fas fa-heart"></i><span>সমর্থক</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">নাম *</label>
                     <input type="text" class="form-input" id="new-reader-name" placeholder="রিডারের নাম লিখুন">
@@ -577,7 +679,17 @@
                     <label class="form-label">ঠিকানা</label>
                     <textarea class="form-textarea" id="new-reader-address" placeholder="ঠিকানা লিখুন"></textarea>
                 </div>
-                <button class="btn btn-primary btn-block" id="btn-add-reader" onclick="addReader()"><i class="fas fa-user-plus"></i> রিডার যোগ করুন</button>
+
+                <div class="prayer-box">
+                    <div class="prayer-box-title"><i class="fas fa-mosque"></i> <span id="prayer-box-label">নামাজ হিসাব</span></div>
+                    <div class="prayer-input-row">
+                        <input type="number" class="form-input" id="new-reader-prayer" min="0" placeholder="০">
+                        <span class="prayer-max" id="prayer-max-label">/ ১৫ ওয়াক্ত (৩ মাস, প্রতি সপ্তাহ ১+১)</span>
+                    </div>
+                    <div class="form-hint" id="prayer-hint">কর্মী/সাথী: গত ৩ মাসে মোট কত ওয়াক্ত নামাজ কাযা হয়েছে তা লিখুন। সমর্থক: গত ১ সপ্তাহে কত ওয়াক্ত কাযা হয়েছে তা লিখুন।</div>
+                </div>
+
+                <button class="btn btn-primary btn-block" id="btn-add-reader" onclick="saveReader()"><i class="fas fa-user-plus"></i> রিডার যোগ করুন</button>
             </div>
         </div>
     </div>
@@ -652,6 +764,18 @@
         </div>
     </div>
 
+    <!-- ===== মোডাল: মাসিক রিপোর্ট ===== -->
+    <div class="modal-overlay" id="modal-report">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3><i class="fas fa-chart-column" style="margin-right:6px;color:var(--primary)"></i>মাসিক রিপোর্ট</h3>
+                <button class="modal-close" onclick="closeModal('modal-report')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="report-body"></div>
+        </div>
+    </div>
+
     <!-- ===== টোস্ট ===== -->
     <div id="toast-container"></div>
 
@@ -659,16 +783,14 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
         import {
-            getDatabase, ref, set, get, remove, push, update, onValue, serverTimestamp
+            getDatabase, ref, set, get, remove, push, update, onValue
         } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
 
         // ================================================================
-        // আপনার Firebase প্রজেক্টের কনফিগ (আপনার নিজের প্রজেক্ট থেকে নেওয়া)
-        // GitHub Pages-এ হোস্ট করার আগে Firebase Console -> Project settings
-        // -> General -> Your apps থেকে আপনার নিজের config বসাতে পারেন।
-        // Realtime Database -> Rules ট্যাবে গিয়ে অন্তত টেস্টের জন্য:
+        // Firebase কনফিগ — GitHub Pages এ হোস্ট করার আগে Realtime Database
+        // Rules ট্যাবে গিয়ে অন্তত টেস্টের জন্য:
         //   { "rules": { ".read": true, ".write": true } }
-        // সেট করে "Publish" করে নিন, নাহলে read/write পারমিশন এরর আসবে।
+        // সেট করে Publish করে নিন।
         // ================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyBMFf3Z_wIgrTADCLHtsBPKK3Xy-axArbU",
@@ -686,7 +808,6 @@
             db = getDatabase(app);
         } catch (e) {
             console.error('Firebase init error:', e);
-            showToast('Firebase চালু করতে সমস্যা হয়েছে', 'error');
         }
 
         // ===== গ্লোবাল স্টেট =====
@@ -697,13 +818,20 @@
         let selectedBookId = null;
         let selectedIssueId = null;
         let selectedReaderPhoto = null;
+        let selectedReaderType = 'sathi';
         let sampleDataLoaded = false;
         let hasConnected = false;
+        let readerFilter = 'all';
+        let reportMonthOffset = 0; // 0 = current month
+        let reportTab = 'issues'; // issues | readers
 
         const booksRef = ref(db, 'books');
         const readersRef = ref(db, 'readers');
         const issuesRef = ref(db, 'issues');
         const connectedRef = ref(db, '.info/connected');
+
+        const STALE_DAYS = 5;
+        const MS_DAY = 86400000;
 
         // ===== কানেকশন স্ট্যাটাস =====
         onValue(connectedRef, (snap) => {
@@ -718,7 +846,6 @@
             } else {
                 badge.classList.remove('online'); badge.classList.add('offline');
                 text.textContent = 'সংযোগ বিচ্ছিন্ন';
-                // কিছুক্ষণ চেষ্টার পরও কানেক্ট না হলে ব্যানার দেখাই
                 if (!hasConnected) {
                     setTimeout(() => { if (!hasConnected) banner.classList.add('show'); }, 6000);
                 }
@@ -728,88 +855,84 @@
             document.getElementById('setup-banner').classList.add('show');
         });
 
-        // ===== স্যাম্পল ডাটা =====
+        // ===== নতুন নমুনা ডাটা: বই তালিকা (রিকোয়েস্ট অনুযায়ী) =====
         const sampleBooks = [
-            { title: "সহীহ বুখারী (১ম খণ্ড)", author: "ইমাম বুখারী (রহ.)", category: "হাদীস", totalCopies: 3 },
-            { title: "সহীহ বুখারী (২য় খণ্ড)", author: "ইমাম বুখারী (রহ.)", category: "হাদীস", totalCopies: 2 },
-            { title: "তিরমিযী শরীফ", author: "ইমাম তিরমিযী (রহ.)", category: "হাদীস", totalCopies: 2 },
-            { title: "রিয়াদুস সালেহীন", author: "ইমাম নাওয়াবী (রহ.)", category: "হাদীস", totalCopies: 4 },
-            { title: "ফিকহুস সুন্নাহ", author: "সাইয়্যিদ সাবেক", category: "ফিকহ", totalCopies: 3 },
-            { title: "আল-আদাবুল মুফরাদ", author: "ইমাম বুখারী (রহ.)", category: "আদব", totalCopies: 2 },
-            { title: "তাফসীর ইবনে কাসীর", author: "আল্লামা ইবনে কাসীর (রহ.)", category: "তাফসীর", totalCopies: 2 },
-            { title: "নবী জীবনী (রাহে বেলাগ)", author: "আয়াতুল্লাহ হামিদানী", category: "সীরাত", totalCopies: 3 },
-            { title: "দাওয়াতে দীন", author: "সৈয়দ আবুল আ'লা মাওদুদী", category: "দাওয়াত", totalCopies: 2 },
-            { title: "ইসলামের ইতিহাস", author: "মাওলানা আকবর খান", category: "ইতিহাস", totalCopies: 2 },
-            { title: "মাসনুন দুআ", author: "মাওলানা আশরাফ আলী থানভী", category: "দুআ", totalCopies: 5 },
-            { title: "বিশ্বাসের মূলনীতি", author: "সৈয়দ আবুল আ'লা মাওদুদী", category: "আকীদাহ", totalCopies: 3 },
+            { title: "মৃত্যু যবনিকার ওপারে", author: "আব্বাস আলী খান", category: "আকীদাহ", totalCopies: 1 },
+            { title: "যাকাতের হাকীকত", author: "সাইয়্যেদ আবুল আ'লা মওদূদী", category: "ফিকহ", totalCopies: 1 },
+            { title: "জীবন্ত নামাজ", author: "অধ্যাপক গোলাম আযম", category: "ইবাদাত", totalCopies: 1 },
+            { title: "ইসলামে ইবাদাতের পরিধি", author: "ড. ইউসুফ আল কারযাভী", category: "ইবাদাত", totalCopies: 1 },
+            { title: "পর্দার আসল রূপ", author: "এ কে এম নাজির আহমদ", category: "সমাজ", totalCopies: 1 },
+            { title: "শিক্ষা ব্যবস্থার ইসলামি রূপরেখা", author: "অধ্যাপক গোলাম আযম", category: "শিক্ষা", totalCopies: 1 },
+            { title: "ইসলামি রাষ্ট্র ব্যবস্থা", author: "ড. আবদুল করিম জায়দান", category: "রাজনীতি", totalCopies: 1 },
+            { title: "ইসলামের স্বর্ণযুগে সামাজিক ন্যায়-নীতি", author: "সাইয়েদ কুতুব", category: "ইতিহাস", totalCopies: 1 },
+            { title: "আমাদের দাওয়াত: জীবনবিধান ইসলাম", author: "ড. ইউসুফ আল কারযাভী", category: "দাওয়াত", totalCopies: 1 },
+            { title: "অর্থনীতিতে রাসূল সা: এর দশ দফা", author: "শাহ মুহাম্মদ হাবিবুর রহমান", category: "অর্থনীতি", totalCopies: 1 },
+            { title: "গণতন্ত্র ইসলামী দৃষ্টিকোণ", author: "ড. আহমদ আলী", category: "রাজনীতি", totalCopies: 1 },
+            { title: "সেকুলারিজম প্রশ্ন", author: "ফাহমিদ-উর-রহমান", category: "রাজনীতি", totalCopies: 1 },
+            { title: "ইসলামী রাষ্ট্র কিভাবে প্রতিষ্ঠিত হয়", author: "সাইয়্যেদ আবুল আ'লা মওদুদী", category: "রাজনীতি", totalCopies: 1 },
+            { title: "ইসলামী আন্দোলন সাফল্যের শর্তাবলি", author: "সাইয়্যেদ আবুল আ'লা মওদূদী", category: "আন্দোলন", totalCopies: 1 },
+            { title: "সত্যের সাক্ষ্য", author: "সাইয়্যেদ আবুল আ'লা মওদূদী", category: "আকীদাহ", totalCopies: 1 },
+            { title: "ইসলামী আন্দোলন ও সংগঠন", author: "মাওলানা মতিউর রহমান নিজামী", category: "আন্দোলন", totalCopies: 1 },
+            { title: "এন্তেখাবে হাদিস (১ম ও ২য়)", author: "আব্দুল গফফার হাসান নদভী", category: "হাদীস", totalCopies: 1 },
+            { title: "রাহে আমল (২য়)", author: "আল্লামা জলীল আহসান নদভী", category: "আমল", totalCopies: 1 },
+            { title: "চল্লিশ হাদিস", author: "ইমাম নববী", category: "হাদীস", totalCopies: 1 },
+            { title: "হাদিস শরিফ (১ম)", author: "আল্লামা মুহাম্মদ আবদুর রহীম", category: "হাদীস", totalCopies: 1 },
+            { title: "কুরআন বুঝা সহজ", author: "অধ্যাপক গোলাম আযম", category: "তাফসীর", totalCopies: 1 },
+            { title: "হাদীসের পরিচয়", author: "জিলহজ আলী", category: "হাদীস", totalCopies: 1 },
+            { title: "সংবিধান", author: "বিআইসিএস", category: "সংগঠন", totalCopies: 1 },
+            { title: "কর্মপদ্ধতি", author: "বিআইসিএস", category: "সংগঠন", totalCopies: 1 },
+            { title: "চরিত্র গঠনের মৌলিক উপাদান", author: "নঈম সিদ্দিকী", category: "চরিত্র গঠন", totalCopies: 1 },
         ];
 
-        const sampleReaders = [
-            { name: "মো. রাশেদুল ইসলাম", phone: "০১৭১২-৩৪৫৬৭৮", address: "৩০ নং ওয়ার্ড, পূর্ব ব্লক" },
-            { name: "আব্দুল্লাহ আল মামুন", phone: "০১৮১৫-৬৭৮৯০১", address: "৩০ নং ওয়ার্ড, মধ্য ব্লক" },
-            { name: "মো. ইব্রাহিম খলিল", phone: "০১৯২৩-৪৫৬৭৮৯", address: "৩০ নং ওয়ার্ড, পশ্চিম ব্লক" },
-            { name: "মো. তানভীর হাসান", phone: "০১৬৪৫-৭৮৯০১২", address: "৩০ নং ওয়ার্ড, দক্ষিণ ব্লক" },
-            { name: "মো. আরিফ হোসেন", phone: "০১৫১৮-২৩৪৫৬৭", address: "৩০ নং ওয়ার্ড, উত্তর ব্লক" },
+        // ===== নতুন নমুনা রিডার তালিকা (রিকোয়েস্ট অনুযায়ী) — টাইপ mix করে বসানো হলো, প্রয়োজনে এডিট করে বদলানো যাবে =====
+        const sampleReaderNames = [
+            "আহমেদ শাহরিয়ার","ফারদিন","তারেখ বিন জায়েদ","মো:রাকিবুল হাসান","জুনায়েদ",
+            "সাকিব","মহিয়ান","তোহা","সম্রাট","সানি",
+            "সৌরভ","আরাফাত","সাব্বির","লিমন","সাদ",
+            "সামি","আদিব","ওয়াসিফ","আব্দুল্লাহ ইবনে আমির","আব্দুল্লাহ আল মুজাহিদ","রাফি"
         ];
+        const typeCycle = ['sathi', 'kormi', 'shomorthok'];
+        const sampleReaders = sampleReaderNames.map((name, idx) => ({
+            name,
+            phone: '',
+            address: '',
+            type: typeCycle[idx % 3],
+            prayerMissed: 0,
+            lastSeen: new Date().toISOString().split('T')[0]
+        }));
 
-        // ===== স্যাম্পল ডাটা লোড (শুধু ডাটাবেজ খালি থাকলে) =====
-        async function loadSampleData() {
+        // ===== পুরনো ডাটা মুছে নতুন ডাটা বসানো (একবারই) =====
+        async function resetAndLoadSampleData() {
             if (sampleDataLoaded) return;
             try {
-                const snapshot = await get(booksRef);
-                if (snapshot.exists() && Object.keys(snapshot.val() || {}).length > 0) {
+                const flagSnap = await get(ref(db, 'meta/v2SampleLoaded'));
+                if (flagSnap.exists() && flagSnap.val() === true) {
                     sampleDataLoaded = true;
                     return;
                 }
 
-                const bookIds = [];
+                // পুরনো সব ডাটা মুছে ফেলা (রিকোয়েস্ট অনুযায়ী "আগের বই গুলার নাম মুছে দাও")
+                await remove(booksRef);
+                await remove(readersRef);
+                await remove(issuesRef);
+
                 for (const book of sampleBooks) {
-                    const newRef = push(booksRef);
-                    await set(newRef, { ...book, createdAt: new Date().toISOString() });
-                    bookIds.push(newRef.key);
+                    await set(push(booksRef), { ...book, createdAt: new Date().toISOString() });
                 }
-
-                const readerIds = [];
                 for (const reader of sampleReaders) {
-                    const newRef = push(readersRef);
-                    await set(newRef, { ...reader, photo: null, createdAt: new Date().toISOString() });
-                    readerIds.push(newRef.key);
+                    await set(push(readersRef), { ...reader, photo: null, createdAt: new Date().toISOString() });
                 }
 
-                const sampleIssues = [
-                    { bookIdx: 0, readerIdx: 0, date: "2025-01-15" },
-                    { bookIdx: 3, readerIdx: 0, date: "2025-02-10" },
-                    { bookIdx: 7, readerIdx: 1, date: "2025-01-20" },
-                    { bookIdx: 4, readerIdx: 1, date: "2025-03-01", returned: "2025-03-25" },
-                    { bookIdx: 1, readerIdx: 2, date: "2025-02-05" },
-                    { bookIdx: 8, readerIdx: 2, date: "2025-01-10", returned: "2025-02-20" },
-                    { bookIdx: 10, readerIdx: 3, date: "2025-03-05" },
-                    { bookIdx: 9, readerIdx: 4, date: "2025-02-15" },
-                    { bookIdx: 11, readerIdx: 4, date: "2025-03-10" },
-                    { bookIdx: 5, readerIdx: 3, date: "2025-01-25", returned: "2025-03-01" },
-                ];
-
-                for (const si of sampleIssues) {
-                    const newRef = push(issuesRef);
-                    await set(newRef, {
-                        bookId: bookIds[si.bookIdx],
-                        readerId: readerIds[si.readerIdx],
-                        issueDate: si.date,
-                        returnDate: si.returned || null,
-                        createdAt: new Date().toISOString()
-                    });
-                }
-
+                await set(ref(db, 'meta/v2SampleLoaded'), true);
                 sampleDataLoaded = true;
-                showToast('নমুনা ডাটা লোড হয়েছে — এখন থেকে শুরু করুন', 'success');
-                console.log('স্যাম্পল ডাটা লোড হয়েছে');
+                showToast('নতুন তালিকা লোড হয়েছে', 'success');
             } catch (err) {
                 console.error('স্যাম্পল ডাটা লোড ত্রুটি:', err);
                 document.getElementById('setup-banner').classList.add('show');
             }
         }
 
-        loadSampleData();
+        resetAndLoadSampleData();
 
         // ===== রিয়েলটাইম লিসেনার =====
         onValue(booksRef, (snapshot) => { books = snapshot.val() || {}; hasConnected = true; updateAllViews(); },
@@ -865,6 +988,23 @@
             const d = document.createElement('div');
             d.textContent = String(s);
             return d.innerHTML;
+        }
+
+        function typeLabel(t) {
+            if (t === 'kormi') return 'কর্মী';
+            if (t === 'shomorthok') return 'সমর্থক';
+            return 'সাথী';
+        }
+
+        function daysSince(dateStr) {
+            if (!dateStr) return Infinity;
+            const then = new Date(dateStr).setHours(0,0,0,0);
+            const now = new Date().setHours(0,0,0,0);
+            return Math.round((now - then) / MS_DAY);
+        }
+
+        function isStale(reader) {
+            return daysSince(reader.lastSeen) > STALE_DAYS;
         }
 
         // ===== ভিউ আপডেট =====
@@ -923,20 +1063,29 @@
             c.innerHTML = ids.reverse().map(id => bookCardHTML(id)).join('');
         }
 
+        window.setReaderFilter = function(t) {
+            readerFilter = t;
+            document.querySelectorAll('#reader-filter-chips .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.type === t));
+            renderReadersList();
+        };
+
         function renderReadersList() {
             const c = document.getElementById('readers-list');
             const q = (document.getElementById('reader-search').value || '').toLowerCase().trim();
             let ids = Object.keys(readers);
             if (q) ids = ids.filter(id => (readers[id].name || '').toLowerCase().includes(q) || (readers[id].phone || '').includes(q));
+            if (readerFilter !== 'all') ids = ids.filter(id => (readers[id].type || 'sathi') === readerFilter);
             if (!ids.length) { c.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>কোনো রিডার পাওয়া যায়নি।</p></div>'; return; }
             c.innerHTML = ids.reverse().map(id => {
                 const r = readers[id];
                 const s = getReaderStats(id);
                 const av = r.photo ? `<img src="${r.photo}" alt="${escHtml(r.name)}">` : getInitial(r.name);
+                const stale = isStale(r);
+                const tagClass = r.type === 'kormi' ? 'karmi' : '';
                 return `<div class="reader-card" onclick="window.openReaderDetail('${id}')">
                     <div class="reader-avatar">${av}</div>
                     <div class="reader-info">
-                        <div class="reader-name">${escHtml(r.name)}</div>
+                        <div class="reader-name ${stale ? 'stale' : ''}">${escHtml(r.name)} <span class="reader-type-tag ${tagClass}">${typeLabel(r.type)}</span></div>
                         <div class="reader-stats">বর্তমান ইস্যু: ${toBn(s.current)} | মোট পড়েছে: ${toBn(s.total)}</div>
                     </div>
                     <div class="reader-actions" onclick="event.stopPropagation()">
@@ -951,7 +1100,6 @@
             const rid = window._currentReaderId;
             if (!rid) { c.innerHTML = '<div class="empty-state"><i class="fas fa-user-slash"></i><p>রিডার পাওয়া যায়নি।</p></div>'; return; }
             if (!readers[rid]) {
-                // ডাটা এখনো Firebase থেকে না আসলে লোডিং দেখাই, খালি না দেখিয়ে
                 if (!hasConnected) { c.innerHTML = '<div class="spinner"></div>'; return; }
                 c.innerHTML = '<div class="empty-state"><i class="fas fa-user-slash"></i><p>রিডার পাওয়া যায়নি। হয়তো মুছে ফেলা হয়েছে।</p></div>';
                 return;
@@ -960,17 +1108,31 @@
             const s = getReaderStats(rid);
             const cb = getReaderCurrentBooks(rid);
             const av = r.photo ? `<img src="${r.photo}" alt="${escHtml(r.name)}">` : getInitial(r.name);
+            const stale = isStale(r);
+            const dSince = daysSince(r.lastSeen);
+            const tagClass = r.type === 'kormi' ? 'karmi' : '';
+            const prayerMax = r.type === 'shomorthok' ? '৭ ওয়াক্ত (১ সপ্তাহ)' : '১৫ ওয়াক্ত (৩ মাস)';
 
             c.innerHTML = `
                 <div class="reader-profile-header">
                     <div class="reader-profile-avatar">${av}</div>
-                    <div class="reader-profile-name">${escHtml(r.name)}</div>
+                    <div class="reader-profile-name">${escHtml(r.name)} <span class="reader-type-tag ${tagClass}">${typeLabel(r.type)}</span></div>
                     <div class="reader-profile-phone"><i class="fas fa-phone" style="margin-right:4px;font-size:.7rem"></i>${escHtml(r.phone || '—')}</div>
                     ${r.address ? `<div style="font-size:.75rem;color:var(--text-secondary);margin-top:4px"><i class="fas fa-map-marker-alt" style="margin-right:4px;font-size:.7rem"></i>${escHtml(r.address)}</div>` : ''}
+                    <div class="last-seen-row ${stale ? 'stale' : ''}">
+                        <i class="fas fa-clock"></i>
+                        শেষ দেখা: ${formatDate(r.lastSeen)} ${r.lastSeen ? '(' + toBn(dSince) + ' দিন আগে)' : ''}
+                        <button onclick="window.markSeenToday('${rid}')">আজ দেখা হয়েছে</button>
+                    </div>
                     <div class="reader-stat-row">
                         <div class="reader-stat-item"><div class="reader-stat-num">${toBn(s.current)}</div><div class="reader-stat-lbl">বর্তমান ইস্যু</div></div>
                         <div class="reader-stat-item"><div class="reader-stat-num">${toBn(s.total)}</div><div class="reader-stat-lbl">মোট পড়েছে</div></div>
+                        <div class="reader-stat-item"><div class="reader-stat-num">${toBn(r.prayerMissed || 0)}</div><div class="reader-stat-lbl">নামাজ কাযা</div></div>
                     </div>
+                    <div class="form-hint" style="margin-top:6px">সীমা: ${prayerMax}</div>
+                </div>
+                <div style="display:flex;gap:8px;margin-bottom:20px">
+                    <button class="btn btn-outline btn-block btn-sm" onclick="window.openEditReaderModal('${rid}')"><i class="fas fa-pen"></i> এডিট করুন</button>
                 </div>
                 <div class="section-title" style="font-size:.95rem"><i class="fas fa-book-reader"></i> বর্তমানে ইস্যুকৃত বই</div>
                 ${!cb.length ? '<div class="empty-state" style="padding:20px"><i class="fas fa-inbox"></i><p>কোনো বই ইস্যু নেই।</p></div>'
@@ -985,6 +1147,13 @@
                     <button class="btn btn-danger btn-block btn-sm" onclick="window.confirmDeleteReader('${rid}')"><i class="fas fa-trash"></i> রিডার মুছে ফেলুন</button>
                 </div>`;
         }
+
+        window.markSeenToday = async function(rid) {
+            try {
+                await update(ref(db, 'readers/' + rid), { lastSeen: new Date().toISOString().split('T')[0] });
+                showToast('দেখা হয়েছে বলে চিহ্নিত করা হলো', 'success');
+            } catch (err) { console.error(err); showToast('সমস্যা: ' + err.message, 'error'); }
+        };
 
         // ===== নেভিগেশন =====
         window.navigateTo = function(v) {
@@ -1001,8 +1170,8 @@
         };
 
         window.handleFabClick = function() {
-            if (currentView === 'books') openModal('modal-add-book');
-            else if (currentView === 'readers') { resetReaderForm(); openModal('modal-add-reader'); }
+            if (currentView === 'books') openAddBookModal();
+            else if (currentView === 'readers') openAddReaderModal();
         };
 
         // ===== মোডাল =====
@@ -1011,8 +1180,37 @@
         window.closeModal = closeModal;
         document.querySelectorAll('.modal-overlay').forEach(o => { o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }); });
 
-        // ===== বই যোগ =====
-        window.addBook = async function() {
+        // ===== বই: যোগ / এডিট =====
+        function openAddBookModal() {
+            document.getElementById('edit-book-id').value = '';
+            document.getElementById('book-modal-title').innerHTML = '<i class="fas fa-book-medical" style="margin-right:6px;color:var(--accent)"></i>নতুন বই যোগ করুন';
+            document.getElementById('new-book-title').value = '';
+            document.getElementById('new-book-author').value = '';
+            document.getElementById('new-book-category').value = '';
+            document.getElementById('new-book-total').value = '1';
+            document.getElementById('book-copy-hint').textContent = '';
+            document.getElementById('btn-add-book').innerHTML = '<i class="fas fa-plus"></i> বই যোগ করুন';
+            openModal('modal-add-book');
+        }
+
+        window.openEditBookModal = function(bookId) {
+            const b = books[bookId];
+            if (!b) return;
+            const s = getBookStats(bookId);
+            document.getElementById('edit-book-id').value = bookId;
+            document.getElementById('book-modal-title').innerHTML = '<i class="fas fa-pen" style="margin-right:6px;color:var(--accent)"></i>বই এডিট করুন';
+            document.getElementById('new-book-title').value = b.title || '';
+            document.getElementById('new-book-author').value = b.author || '';
+            document.getElementById('new-book-category').value = b.category || '';
+            document.getElementById('new-book-total').value = b.totalCopies || 1;
+            document.getElementById('book-copy-hint').textContent = s.issued > 0 ? `বর্তমানে ${toBn(s.issued)}টি কপি ইস্যু আছে — মোট কপি সংখ্যা এর কম দিতে পারবেন না।` : '';
+            document.getElementById('btn-add-book').innerHTML = '<i class="fas fa-save"></i> পরিবর্তন সংরক্ষণ করুন';
+            closeModal('modal-book-detail');
+            openModal('modal-add-book');
+        };
+
+        window.saveBook = async function() {
+            const editId = document.getElementById('edit-book-id').value;
             const titleEl = document.getElementById('new-book-title');
             const authorEl = document.getElementById('new-book-author');
             const categoryEl = document.getElementById('new-book-category');
@@ -1028,12 +1226,24 @@
             if (!author) { showToast('লেখকের নাম লিখুন', 'error'); authorEl.focus(); return; }
             if (totalCopies < 1) { showToast('কমপক্ষে ১টি কপি হতে হবে', 'error'); return; }
 
+            if (editId) {
+                const s = getBookStats(editId);
+                if (totalCopies < s.issued) {
+                    showToast(`মোট কপি ${toBn(s.issued)} এর কম দেওয়া যাবে না (এতগুলো এখন ইস্যু আছে)`, 'error');
+                    return;
+                }
+            }
+
             btn.disabled = true;
             try {
-                await set(push(booksRef), { title, author, category, totalCopies, createdAt: new Date().toISOString() });
+                if (editId) {
+                    await update(ref(db, 'books/' + editId), { title, author, category, totalCopies });
+                    showToast('বই আপডেট হয়েছে', 'success');
+                } else {
+                    await set(push(booksRef), { title, author, category, totalCopies, createdAt: new Date().toISOString() });
+                    showToast('বই সফলভাবে যোগ হয়েছে', 'success');
+                }
                 closeModal('modal-add-book');
-                titleEl.value = ''; authorEl.value = ''; categoryEl.value = ''; totalEl.value = '1';
-                showToast('বই সফলভাবে যোগ হয়েছে', 'success');
             } catch (err) {
                 console.error(err);
                 showToast('সমস্যা: ' + err.message, 'error');
@@ -1067,7 +1277,12 @@
             <div class="issue-detail-row"><span class="issue-detail-label">ইস্যুকৃত</span><span class="issue-detail-value" style="color:var(--accent)">${toBn(s.issued)}</span></div>
             <div class="issue-detail-row"><span class="issue-detail-label">প্রাপ্য</span><span class="issue-detail-value" style="color:var(--success);font-weight:800">${toBn(s.available)}</span></div>
             <div style="display:flex;gap:8px;margin-top:20px">`;
-            if (s.available > 0) h += `<button class="btn btn-accent" style="flex:1" onclick="window.openIssueModal('${bookId}')"><i class="fas fa-hand-holding"></i> ইস্যু করুন</button>`;
+            if (s.available > 0) {
+                h += `<button class="btn btn-accent" style="flex:1" onclick="window.openIssueModal('${bookId}')"><i class="fas fa-hand-holding"></i> ইস্যু করুন</button>`;
+            } else {
+                h += `<button class="btn" style="flex:1;background:var(--border);color:var(--text-muted);cursor:not-allowed" disabled><i class="fas fa-ban"></i> কোনো কপি নেই</button>`;
+            }
+            h += `<button class="btn btn-outline btn-sm" onclick="window.openEditBookModal('${bookId}')"><i class="fas fa-pen"></i></button>`;
             h += `<button class="btn btn-danger btn-sm" onclick="window.confirmDeleteBook('${bookId}')"><i class="fas fa-trash"></i></button></div>`;
             if (hist.length) {
                 h += `<div class="section-title" style="font-size:.9rem;margin-top:24px"><i class="fas fa-history"></i> ইস্যু ইতিহাস</div>`;
@@ -1087,6 +1302,8 @@
 
         // ===== ইস্যু মোডাল =====
         window.openIssueModal = function(bookId) {
+            const s = getBookStats(bookId);
+            if (s.available <= 0) { showToast('এই বইয়ের কোনো কপি এখন প্রাপ্য নেই — সব ইস্যু আছে', 'error'); return; }
             if (!readers || Object.keys(readers).length === 0) {
                 showToast('আগে অন্তত একজন রিডার যোগ করুন', 'warning');
                 return;
@@ -1099,8 +1316,8 @@
             const sel = document.getElementById('issue-reader-select');
             sel.innerHTML = '<option value="">রিডার নির্বাচন করুন</option>';
             Object.entries(readers).forEach(([id, r]) => {
-                const s = getReaderStats(id);
-                sel.innerHTML += `<option value="${id}">${escHtml(r.name)} (${escHtml(r.phone || '')}) — বর্তমান: ${toBn(s.current)}</option>`;
+                const rs = getReaderStats(id);
+                sel.innerHTML += `<option value="${id}">${escHtml(r.name)} (${typeLabel(r.type)}) — বর্তমান: ${toBn(rs.current)}</option>`;
             });
             closeModal('modal-book-detail');
             openModal('modal-issue-book');
@@ -1113,10 +1330,11 @@
             if (!rid) { showToast('রিডার নির্বাচন করুন', 'error'); return; }
             if (!d) { showToast('তারিখ নির্বাচন করুন', 'error'); return; }
             const s = getBookStats(selectedBookId);
-            if (s.available <= 0) { showToast('আর কপি নেই', 'error'); return; }
+            if (s.available <= 0) { showToast('আর কোনো কপি নেই — ইস্যু করা যাবে না', 'error'); return; }
             btn.disabled = true;
             try {
                 await set(push(issuesRef), { bookId: selectedBookId, readerId: rid, issueDate: d, returnDate: null, createdAt: new Date().toISOString() });
+                await update(ref(db, 'readers/' + rid), { lastSeen: d });
                 closeModal('modal-issue-book');
                 showToast('বই সফলভাবে ইস্যু হয়েছে', 'success');
             } catch (err) {
@@ -1146,7 +1364,9 @@
             if (!d) { showToast('ফেরতের তারিখ দিন', 'error'); return; }
             btn.disabled = true;
             try {
+                const i = issues[selectedIssueId];
                 await update(ref(db, 'issues/' + selectedIssueId), { returnDate: d });
+                if (i && i.readerId) await update(ref(db, 'readers/' + i.readerId), { lastSeen: d });
                 closeModal('modal-return-book');
                 showToast('বই সফলভাবে ফেরত নেওয়া হয়েছে', 'success');
             } catch (err) {
@@ -1194,6 +1414,7 @@
             document.getElementById('new-reader-name').value = '';
             document.getElementById('new-reader-phone').value = '';
             document.getElementById('new-reader-address').value = '';
+            document.getElementById('new-reader-prayer').value = '';
             document.getElementById('reader-photo-input').value = '';
             const up = document.getElementById('reader-photo-upload');
             const img = up.querySelector('img');
@@ -1202,26 +1423,97 @@
             document.getElementById('photo-remove-btn').style.display = 'none';
         }
 
-        // ===== রিডার যোগ =====
-        window.addReader = async function() {
+        window.selectReaderType = function(t) {
+            selectedReaderType = t;
+            document.querySelectorAll('#reader-type-toggle .type-toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.type === t));
+            const label = document.getElementById('prayer-box-label');
+            const maxLabel = document.getElementById('prayer-max-label');
+            const hint = document.getElementById('prayer-hint');
+            if (t === 'shomorthok') {
+                label.textContent = 'নামাজ হিসাব (সমর্থক)';
+                maxLabel.textContent = '/ ৭ ওয়াক্ত (১ সপ্তাহ)';
+                hint.textContent = 'গত ১ সপ্তাহে মোট কত ওয়াক্ত নামাজ কাযা হয়েছে তা লিখুন।';
+            } else {
+                label.textContent = 'নামাজ হিসাব (' + typeLabel(t) + ')';
+                maxLabel.textContent = '/ ১৫ ওয়াক্ত (৩ মাস)';
+                hint.textContent = 'গত ৩ মাসে মোট কত ওয়াক্ত নামাজ কাযা হয়েছে তা লিখুন।';
+            }
+        };
+
+        // ===== রিডার: যোগ / এডিট =====
+        function openAddReaderModal() {
+            document.getElementById('edit-reader-id').value = '';
+            document.getElementById('reader-modal-title').innerHTML = '<i class="fas fa-user-plus" style="margin-right:6px;color:var(--accent)"></i>নতুন রিডার যোগ করুন';
+            resetReaderForm();
+            window.selectReaderType('sathi');
+            document.getElementById('btn-add-reader').innerHTML = '<i class="fas fa-user-plus"></i> রিডার যোগ করুন';
+            openModal('modal-add-reader');
+        }
+
+        window.openEditReaderModal = function(rid) {
+            const r = readers[rid];
+            if (!r) return;
+            document.getElementById('edit-reader-id').value = rid;
+            document.getElementById('reader-modal-title').innerHTML = '<i class="fas fa-pen" style="margin-right:6px;color:var(--accent)"></i>রিডার এডিট করুন';
+            document.getElementById('new-reader-name').value = r.name || '';
+            document.getElementById('new-reader-phone').value = r.phone || '';
+            document.getElementById('new-reader-address').value = r.address || '';
+            document.getElementById('new-reader-prayer').value = r.prayerMissed || 0;
+            selectedReaderPhoto = r.photo || null;
+            const up = document.getElementById('reader-photo-upload');
+            const oldImg = up.querySelector('img');
+            if (oldImg) oldImg.remove();
+            if (r.photo) {
+                const img = document.createElement('img');
+                img.src = r.photo;
+                up.appendChild(img);
+                up.classList.add('has-photo');
+                document.getElementById('photo-remove-btn').style.display = 'block';
+            } else {
+                up.classList.remove('has-photo');
+                document.getElementById('photo-remove-btn').style.display = 'none';
+            }
+            window.selectReaderType(r.type || 'sathi');
+            document.getElementById('btn-add-reader').innerHTML = '<i class="fas fa-save"></i> পরিবর্তন সংরক্ষণ করুন';
+            closeModal('modal-report');
+            openModal('modal-add-reader');
+        };
+
+        window.saveReader = async function() {
+            const editId = document.getElementById('edit-reader-id').value;
             const nameEl = document.getElementById('new-reader-name');
             const phoneEl = document.getElementById('new-reader-phone');
             const addressEl = document.getElementById('new-reader-address');
+            const prayerEl = document.getElementById('new-reader-prayer');
             const btn = document.getElementById('btn-add-reader');
 
             const name = nameEl.value.trim();
             const phone = phoneEl.value.trim();
             const address = addressEl.value.trim();
+            const prayerMissed = parseInt(prayerEl.value) || 0;
 
             if (!name) { showToast('রিডারের নাম লিখুন', 'error'); nameEl.focus(); return; }
             if (!phone) { showToast('ফোন নম্বর লিখুন', 'error'); phoneEl.focus(); return; }
 
             btn.disabled = true;
             try {
-                await set(push(readersRef), { name, phone, address, photo: selectedReaderPhoto || null, createdAt: new Date().toISOString() });
+                if (editId) {
+                    await update(ref(db, 'readers/' + editId), {
+                        name, phone, address, type: selectedReaderType,
+                        prayerMissed, photo: selectedReaderPhoto || null
+                    });
+                    showToast('রিডার আপডেট হয়েছে', 'success');
+                } else {
+                    await set(push(readersRef), {
+                        name, phone, address, type: selectedReaderType,
+                        prayerMissed, photo: selectedReaderPhoto || null,
+                        lastSeen: new Date().toISOString().split('T')[0],
+                        createdAt: new Date().toISOString()
+                    });
+                    showToast('রিডার সফলভাবে যোগ হয়েছে', 'success');
+                }
                 closeModal('modal-add-reader');
                 resetReaderForm();
-                showToast('রিডার সফলভাবে যোগ হয়েছে', 'success');
             } catch (err) {
                 console.error(err);
                 showToast('সমস্যা: ' + err.message, 'error');
@@ -1285,6 +1577,104 @@
         // ===== সার্চ =====
         document.getElementById('book-search').addEventListener('input', renderBooksList);
         document.getElementById('reader-search').addEventListener('input', renderReadersList);
+
+        // ===== মাসিক রিপোর্ট =====
+        function getMonthBounds(offset) {
+            const now = new Date();
+            const target = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+            const start = new Date(target.getFullYear(), target.getMonth(), 1);
+            const end = new Date(target.getFullYear(), target.getMonth() + 1, 1);
+            return { start, end, label: target.toLocaleDateString('bn-BD', { year: 'numeric', month: 'long' }) };
+        }
+
+        window.changeReportMonth = function(delta) {
+            reportMonthOffset += delta;
+            if (reportMonthOffset > 0) reportMonthOffset = 0;
+            renderReport();
+        };
+
+        window.setReportTab = function(t) {
+            reportTab = t;
+            renderReport();
+        };
+
+        window.openReportModal = function() {
+            reportMonthOffset = 0;
+            reportTab = 'issues';
+            renderReport();
+            openModal('modal-report');
+        };
+
+        function renderReport() {
+            const { start, end, label } = getMonthBounds(reportMonthOffset);
+            const monthIssues = Object.entries(issues).filter(([, i]) => {
+                if (!i.issueDate) return false;
+                const d = new Date(i.issueDate);
+                return d >= start && d < end;
+            });
+
+            const perReaderCount = {};
+            monthIssues.forEach(([, i]) => {
+                perReaderCount[i.readerId] = (perReaderCount[i.readerId] || 0) + 1;
+            });
+            const readerRanking = Object.entries(perReaderCount)
+                .map(([rid, count]) => ({ rid, count, name: readers[rid]?.name || 'অজানা' }))
+                .sort((a, b) => b.count - a.count);
+
+            const totalIssuedThisMonth = monthIssues.length;
+            const returnedThisMonth = monthIssues.filter(([, i]) => !!i.returnDate).length;
+            const stillOutThisMonth = totalIssuedThisMonth - returnedThisMonth;
+
+            let h = `<div class="month-nav">
+                <button onclick="window.changeReportMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                <div class="mn-label">${label}</div>
+                <button onclick="window.changeReportMonth(1)" ${reportMonthOffset >= 0 ? 'style="opacity:.35;pointer-events:none"' : ''}><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="report-summary">
+                <div class="report-stat"><div class="rs-num">${toBn(totalIssuedThisMonth)}</div><div class="rs-lbl">এই মাসে ইস্যু হওয়া বই</div></div>
+                <div class="report-stat"><div class="rs-num">${toBn(readerRanking.length)}</div><div class="rs-lbl">যত জন রিডার পড়েছে</div></div>
+                <div class="report-stat"><div class="rs-num">${toBn(returnedThisMonth)}</div><div class="rs-lbl">ফেরত দেওয়া হয়েছে</div></div>
+                <div class="report-stat"><div class="rs-num">${toBn(stillOutThisMonth)}</div><div class="rs-lbl">এখনো হাতে আছে</div></div>
+            </div>
+            <div class="report-tabs">
+                <div class="report-tab ${reportTab === 'issues' ? 'active' : ''}" onclick="window.setReportTab('issues')">বই তালিকা</div>
+                <div class="report-tab ${reportTab === 'readers' ? 'active' : ''}" onclick="window.setReportTab('readers')">শীর্ষ পাঠক</div>
+            </div>`;
+
+            if (reportTab === 'readers') {
+                if (!readerRanking.length) {
+                    h += '<div class="empty-state" style="padding:24px"><i class="fas fa-user-clock"></i><p>এই মাসে কোনো বই ইস্যু হয়নি।</p></div>';
+                } else {
+                    readerRanking.forEach((rr, idx) => {
+                        h += `<div class="report-list-item">
+                            <div class="report-rank">${toBn(idx + 1)}</div>
+                            <div class="rli-name">${escHtml(rr.name)}</div>
+                            <div class="rli-count">${toBn(rr.count)} বই</div>
+                        </div>`;
+                    });
+                }
+            } else {
+                if (!monthIssues.length) {
+                    h += '<div class="empty-state" style="padding:24px"><i class="fas fa-book"></i><p>এই মাসে কোনো বই ইস্যু হয়নি।</p></div>';
+                } else {
+                    monthIssues
+                        .sort((a, b) => new Date(b[1].issueDate) - new Date(a[1].issueDate))
+                        .forEach(([, i]) => {
+                            const bTitle = books[i.bookId]?.title || 'অজানা বই';
+                            const rName = readers[i.readerId]?.name || 'অজানা রিডার';
+                            h += `<div class="issued-book-item">
+                                <div class="issued-book-info">
+                                    <div class="issued-book-title">${escHtml(bTitle)}</div>
+                                    <div class="issued-book-date">${escHtml(rName)} • ইস্যু: ${formatDate(i.issueDate)}</div>
+                                </div>
+                                <span style="font-size:.63rem;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0;${i.returnDate ? 'background:#ECFDF5;color:#059669' : 'background:var(--accent-light);color:var(--accent)'}">${i.returnDate ? 'ফেরত' : 'বর্তমান'}</span>
+                            </div>`;
+                        });
+                }
+            }
+
+            document.getElementById('report-body').innerHTML = h;
+        }
 
         // ===== টোস্ট =====
         function showToast(msg, type = 'success') {

@@ -201,13 +201,17 @@
         }
         .reader-avatar img{width:100%;height:100%;object-fit:cover}
         .reader-info{flex:1;min-width:0}
-        .reader-name{font-size:0.88rem;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:6px}
+        .reader-name{font-size:0.88rem;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
         .reader-name.stale{color:var(--danger)}
         .reader-type-tag{
             font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:20px;
             background:var(--primary-lighter);color:var(--primary);flex-shrink:0;
         }
         .reader-type-tag.karmi{background:var(--accent-light);color:var(--accent)}
+        .reader-branch-tag{
+            font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:20px;
+            background:#EEF2FF;color:#4338CA;flex-shrink:0;
+        }
         .reader-stats{font-size:0.68rem;color:var(--text-secondary)}
         .reader-actions{display:flex;gap:6px}
         .reader-action-btn{
@@ -235,6 +239,7 @@
             cursor:pointer;transition:all .2s;
         }
         .filter-chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+        .filter-group-label{font-size:.68rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;margin-top:2px}
 
         .btn{
             display:inline-flex;align-items:center;justify-content:center;gap:6px;
@@ -569,11 +574,19 @@
                 <i class="fas fa-search"></i>
                 <input type="text" id="reader-search" placeholder="রিডার খুঁজুন (নাম বা ফোন)...">
             </div>
+            <div class="filter-group-label">ধরন</div>
             <div class="filter-chips" id="reader-filter-chips">
                 <div class="filter-chip active" data-type="all" onclick="window.setReaderFilter('all')">সবাই</div>
                 <div class="filter-chip" data-type="sathi" onclick="window.setReaderFilter('sathi')">সাথী</div>
                 <div class="filter-chip" data-type="kormi" onclick="window.setReaderFilter('kormi')">কর্মী</div>
                 <div class="filter-chip" data-type="shomorthok" onclick="window.setReaderFilter('shomorthok')">সমর্থক</div>
+            </div>
+            <div class="filter-group-label">উপশাখা</div>
+            <div class="filter-chips" id="reader-branch-chips">
+                <div class="filter-chip active" data-branch="all" onclick="window.setReaderBranchFilter('all')">সব উপশাখা</div>
+                <div class="filter-chip" data-branch="dhaka-housing" onclick="window.setReaderBranchFilter('dhaka-housing')">ঢাকা হাউজিং</div>
+                <div class="filter-chip" data-branch="mohonpur" onclick="window.setReaderBranchFilter('mohonpur')">মহনপুর</div>
+                <div class="filter-chip" data-branch="mission-college" onclick="window.setReaderBranchFilter('mission-college')">Mission College</div>
             </div>
             <div id="readers-list"><div class="spinner"></div></div>
         </div>
@@ -665,6 +678,15 @@
                             <i class="fas fa-heart"></i><span>সমর্থক</span>
                         </div>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">উপশাখা *</label>
+                    <select class="form-select" id="new-reader-branch">
+                        <option value="dhaka-housing">ঢাকা হাউজিং</option>
+                        <option value="mohonpur">মহনপুর</option>
+                        <option value="mission-college">Mission College</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -822,6 +844,7 @@
         let sampleDataLoaded = false;
         let hasConnected = false;
         let readerFilter = 'all';
+        let readerBranchFilter = 'all';
         let reportMonthOffset = 0; // 0 = current month
         let reportTab = 'issues'; // issues | readers
 
@@ -884,19 +907,53 @@
             { title: "চরিত্র গঠনের মৌলিক উপাদান", author: "নঈম সিদ্দিকী", category: "চরিত্র গঠন", totalCopies: 1 },
         ];
 
-        // ===== নতুন নমুনা রিডার তালিকা (রিকোয়েস্ট অনুযায়ী) — টাইপ mix করে বসানো হলো, প্রয়োজনে এডিট করে বদলানো যাবে =====
-        const sampleReaderNames = [
-            "আহমেদ শাহরিয়ার","ফারদিন","তারেখ বিন জায়েদ","মো:রাকিবুল হাসান","জুনায়েদ",
-            "সাকিব","মহিয়ান","তোহা","সম্রাট","সানি",
-            "সৌরভ","আরাফাত","সাব্বির","লিমন","সাদ",
-            "সামি","আদিব","ওয়াসিফ","আব্দুল্লাহ ইবনে আমির","আব্দুল্লাহ আল মুজাহিদ","রাফি"
-        ];
-        const typeCycle = ['sathi', 'kormi', 'shomorthok'];
-        const sampleReaders = sampleReaderNames.map((name, idx) => ({
-            name,
+        // ===== নতুন নমুনা রিডার তালিকা — উপশাখা ভিত্তিক (রিকোয়েস্ট অনুযায়ী) =====
+        const sampleReaders = [
+            // ---- ঢাকা হাউজিং ----
+            { name: "faruk", type: "sathi", branch: "dhaka-housing" },
+            { name: "rafiyat", type: "sathi", branch: "dhaka-housing" },
+            { name: "sad bin shihab", type: "sathi", branch: "dhaka-housing" },
+            { name: "rafid hasan ayan", type: "sathi", branch: "dhaka-housing" },
+            { name: "maisun mujahid", type: "kormi", branch: "dhaka-housing" },
+            { name: "আহমেদ শাহরিয়ার", type: "kormi", branch: "dhaka-housing" },
+            { name: "ফারদিন", type: "kormi", branch: "dhaka-housing" },
+            { name: "তারেখ বিন জায়েদ", type: "kormi", branch: "dhaka-housing" },
+            { name: "মো:রাকিবুল হাসান", type: "kormi", branch: "dhaka-housing" },
+            { name: "জুনায়েদ", type: "kormi", branch: "dhaka-housing" },
+            { name: "সাকিব", type: "kormi", branch: "dhaka-housing" },
+            { name: "মহিয়ান", type: "kormi", branch: "dhaka-housing" },
+            { name: "তোহা", type: "kormi", branch: "dhaka-housing" },
+            { name: "সম্রাট", type: "kormi", branch: "dhaka-housing" },
+            { name: "julkarnain", type: "shomorthok", branch: "dhaka-housing" },
+            { name: "najmul", type: "shomorthok", branch: "dhaka-housing" },
+            { name: "sohan", type: "shomorthok", branch: "dhaka-housing" },
+            { name: "ashraful", type: "shomorthok", branch: "dhaka-housing" },
+            // ---- মহনপুর ----
+            { name: "sahriyar nafis", type: "sathi", branch: "mohonpur" },
+            { name: "Adbullah Jubayer", type: "sathi", branch: "mohonpur" },
+            { name: "সাদ", type: "kormi", branch: "mohonpur" },
+            { name: "সামি", type: "kormi", branch: "mohonpur" },
+            { name: "আদিব", type: "kormi", branch: "mohonpur" },
+            { name: "ওয়াসিফ", type: "kormi", branch: "mohonpur" },
+            { name: "আব্দুল্লাহ ইবনে আমির", type: "kormi", branch: "mohonpur" },
+            { name: "আব্দুল্লাহ আল মুজাহিদ", type: "kormi", branch: "mohonpur" },
+            { name: "রাফি", type: "kormi", branch: "mohonpur" },
+            { name: "abir", type: "shomorthok", branch: "mohonpur" },
+            { name: "redwan", type: "shomorthok", branch: "mohonpur" },
+            // ---- Mission College ----
+            { name: "Ahmad Abdullah", type: "sathi", branch: "mission-college" },
+            { name: "সানি", type: "kormi", branch: "mission-college" },
+            { name: "সৌরভ", type: "kormi", branch: "mission-college" },
+            { name: "আরাফাত", type: "kormi", branch: "mission-college" },
+            { name: "সাব্বির", type: "kormi", branch: "mission-college" },
+            { name: "লিমন", type: "kormi", branch: "mission-college" },
+            { name: "sabbir", type: "shomorthok", branch: "mission-college" },
+        ].map(r => ({
+            name: r.name,
             phone: '',
             address: '',
-            type: typeCycle[idx % 3],
+            type: r.type,
+            branch: r.branch,
             prayerMissed: 0,
             lastSeen: new Date().toISOString().split('T')[0]
         }));
@@ -905,13 +962,13 @@
         async function resetAndLoadSampleData() {
             if (sampleDataLoaded) return;
             try {
-                const flagSnap = await get(ref(db, 'meta/v2SampleLoaded'));
+                const flagSnap = await get(ref(db, 'meta/v3SampleLoaded'));
                 if (flagSnap.exists() && flagSnap.val() === true) {
                     sampleDataLoaded = true;
                     return;
                 }
 
-                // পুরনো সব ডাটা মুছে ফেলা (রিকোয়েস্ট অনুযায়ী "আগের বই গুলার নাম মুছে দাও")
+                // পুরনো সব ডাটা মুছে ফেলা
                 await remove(booksRef);
                 await remove(readersRef);
                 await remove(issuesRef);
@@ -923,7 +980,7 @@
                     await set(push(readersRef), { ...reader, photo: null, createdAt: new Date().toISOString() });
                 }
 
-                await set(ref(db, 'meta/v2SampleLoaded'), true);
+                await set(ref(db, 'meta/v3SampleLoaded'), true);
                 sampleDataLoaded = true;
                 showToast('নতুন তালিকা লোড হয়েছে', 'success');
             } catch (err) {
@@ -994,6 +1051,13 @@
             if (t === 'kormi') return 'কর্মী';
             if (t === 'shomorthok') return 'সমর্থক';
             return 'সাথী';
+        }
+
+        function branchLabel(b) {
+            if (b === 'mohonpur') return 'মহনপুর';
+            if (b === 'mission-college') return 'Mission College';
+            if (b === 'dhaka-housing') return 'ঢাকা হাউজিং';
+            return 'অনির্দিষ্ট';
         }
 
         function daysSince(dateStr) {
@@ -1069,12 +1133,19 @@
             renderReadersList();
         };
 
+        window.setReaderBranchFilter = function(b) {
+            readerBranchFilter = b;
+            document.querySelectorAll('#reader-branch-chips .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.branch === b));
+            renderReadersList();
+        };
+
         function renderReadersList() {
             const c = document.getElementById('readers-list');
             const q = (document.getElementById('reader-search').value || '').toLowerCase().trim();
             let ids = Object.keys(readers);
             if (q) ids = ids.filter(id => (readers[id].name || '').toLowerCase().includes(q) || (readers[id].phone || '').includes(q));
             if (readerFilter !== 'all') ids = ids.filter(id => (readers[id].type || 'sathi') === readerFilter);
+            if (readerBranchFilter !== 'all') ids = ids.filter(id => (readers[id].branch || '') === readerBranchFilter);
             if (!ids.length) { c.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>কোনো রিডার পাওয়া যায়নি।</p></div>'; return; }
             c.innerHTML = ids.reverse().map(id => {
                 const r = readers[id];
@@ -1085,7 +1156,7 @@
                 return `<div class="reader-card" onclick="window.openReaderDetail('${id}')">
                     <div class="reader-avatar">${av}</div>
                     <div class="reader-info">
-                        <div class="reader-name ${stale ? 'stale' : ''}">${escHtml(r.name)} <span class="reader-type-tag ${tagClass}">${typeLabel(r.type)}</span></div>
+                        <div class="reader-name ${stale ? 'stale' : ''}">${escHtml(r.name)} <span class="reader-type-tag ${tagClass}">${typeLabel(r.type)}</span> <span class="reader-branch-tag">${branchLabel(r.branch)}</span></div>
                         <div class="reader-stats">বর্তমান ইস্যু: ${toBn(s.current)} | মোট পড়েছে: ${toBn(s.total)}</div>
                     </div>
                     <div class="reader-actions" onclick="event.stopPropagation()">
@@ -1116,7 +1187,7 @@
             c.innerHTML = `
                 <div class="reader-profile-header">
                     <div class="reader-profile-avatar">${av}</div>
-                    <div class="reader-profile-name">${escHtml(r.name)} <span class="reader-type-tag ${tagClass}">${typeLabel(r.type)}</span></div>
+                    <div class="reader-profile-name">${escHtml(r.name)} <span class="reader-type-tag ${tagClass}">${typeLabel(r.type)}</span> <span class="reader-branch-tag">${branchLabel(r.branch)}</span></div>
                     <div class="reader-profile-phone"><i class="fas fa-phone" style="margin-right:4px;font-size:.7rem"></i>${escHtml(r.phone || '—')}</div>
                     ${r.address ? `<div style="font-size:.75rem;color:var(--text-secondary);margin-top:4px"><i class="fas fa-map-marker-alt" style="margin-right:4px;font-size:.7rem"></i>${escHtml(r.address)}</div>` : ''}
                     <div class="last-seen-row ${stale ? 'stale' : ''}">
@@ -1317,7 +1388,7 @@
             sel.innerHTML = '<option value="">রিডার নির্বাচন করুন</option>';
             Object.entries(readers).forEach(([id, r]) => {
                 const rs = getReaderStats(id);
-                sel.innerHTML += `<option value="${id}">${escHtml(r.name)} (${typeLabel(r.type)}) — বর্তমান: ${toBn(rs.current)}</option>`;
+                sel.innerHTML += `<option value="${id}">${escHtml(r.name)} (${typeLabel(r.type)} • ${branchLabel(r.branch)}) — বর্তমান: ${toBn(rs.current)}</option>`;
             });
             closeModal('modal-book-detail');
             openModal('modal-issue-book');
@@ -1415,6 +1486,7 @@
             document.getElementById('new-reader-phone').value = '';
             document.getElementById('new-reader-address').value = '';
             document.getElementById('new-reader-prayer').value = '';
+            document.getElementById('new-reader-branch').value = 'dhaka-housing';
             document.getElementById('reader-photo-input').value = '';
             const up = document.getElementById('reader-photo-upload');
             const img = up.querySelector('img');
@@ -1459,6 +1531,7 @@
             document.getElementById('new-reader-phone').value = r.phone || '';
             document.getElementById('new-reader-address').value = r.address || '';
             document.getElementById('new-reader-prayer').value = r.prayerMissed || 0;
+            document.getElementById('new-reader-branch').value = r.branch || 'dhaka-housing';
             selectedReaderPhoto = r.photo || null;
             const up = document.getElementById('reader-photo-upload');
             const oldImg = up.querySelector('img');
@@ -1485,12 +1558,14 @@
             const phoneEl = document.getElementById('new-reader-phone');
             const addressEl = document.getElementById('new-reader-address');
             const prayerEl = document.getElementById('new-reader-prayer');
+            const branchEl = document.getElementById('new-reader-branch');
             const btn = document.getElementById('btn-add-reader');
 
             const name = nameEl.value.trim();
             const phone = phoneEl.value.trim();
             const address = addressEl.value.trim();
             const prayerMissed = parseInt(prayerEl.value) || 0;
+            const branch = branchEl.value;
 
             if (!name) { showToast('রিডারের নাম লিখুন', 'error'); nameEl.focus(); return; }
             if (!phone) { showToast('ফোন নম্বর লিখুন', 'error'); phoneEl.focus(); return; }
@@ -1499,13 +1574,13 @@
             try {
                 if (editId) {
                     await update(ref(db, 'readers/' + editId), {
-                        name, phone, address, type: selectedReaderType,
+                        name, phone, address, type: selectedReaderType, branch,
                         prayerMissed, photo: selectedReaderPhoto || null
                     });
                     showToast('রিডার আপডেট হয়েছে', 'success');
                 } else {
                     await set(push(readersRef), {
-                        name, phone, address, type: selectedReaderType,
+                        name, phone, address, type: selectedReaderType, branch,
                         prayerMissed, photo: selectedReaderPhoto || null,
                         lastSeen: new Date().toISOString().split('T')[0],
                         createdAt: new Date().toISOString()
